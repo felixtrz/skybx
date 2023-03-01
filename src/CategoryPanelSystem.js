@@ -139,6 +139,10 @@ export class CategoryPanelSystem extends XRGameSystem {
 		);
 
 		if (intersect && intersect.object.isUI) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersect.distance,
+			);
 			if (intersect.object !== this.selectedButton) {
 				if (selectState && intersect.object.currentState === 'hovered') {
 					if (intersect.object.states['selected']) {

@@ -10,6 +10,8 @@ export class UIComponent extends GameComponent {}
 UIComponent.schema = {
 	container: { type: Types.Ref, default: null },
 	raycaster: { type: Types.Ref, default: null },
+	targetRay: { type: Types.Ref, default: null },
+	marker: { type: Types.Ref, default: null },
 };
 
 export class UISystem extends XRGameSystem {
@@ -21,6 +23,12 @@ export class UISystem extends XRGameSystem {
 		this.ui.raycaster.far = 2;
 		this.isFollowing = false;
 		this.followingSpeed = 0;
+		this.ui.marker = new THREE.Mesh(
+			new THREE.SphereGeometry(0.008, 32, 32),
+			new THREE.MeshBasicMaterial({
+				color: 0xffffff,
+			}),
+		);
 	}
 
 	update(delta, _time) {
@@ -28,25 +36,22 @@ export class UISystem extends XRGameSystem {
 		if (!rightController) return;
 
 		if (!this.ui.container.parent) {
-			this.core.scene.add(this.ui.container);
+			this.core.playerSpace.add(this.ui.container);
 		}
-		if (!rightController.targetRay) {
-			const geometry = new THREE.BufferGeometry();
-			geometry.setAttribute(
-				'position',
-				new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, -2], 3),
-			);
-			geometry.setAttribute(
-				'color',
-				new THREE.Float32BufferAttribute([0.5, 0.5, 0.5, 0, 0, 0], 3),
-			);
+		if (!this.ui.targetRay) {
 			const material = new THREE.LineBasicMaterial({
-				vertexColors: true,
-				blending: THREE.AdditiveBlending,
+				color: 0xffffff,
 			});
 
-			rightController.targetRay = new THREE.Line(geometry, material);
-			rightController.targetRaySpace.add(rightController.targetRay);
+			const points = [];
+			points.push(new THREE.Vector3(0, 0, 0));
+			points.push(new THREE.Vector3(0, 0, -1));
+
+			const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+			this.ui.targetRay = new THREE.Line(geometry, material);
+			rightController.targetRaySpace.add(this.ui.targetRay);
+			rightController.targetRaySpace.add(this.ui.marker);
 		}
 
 		this.ui.raycaster.set(
@@ -55,6 +60,7 @@ export class UISystem extends XRGameSystem {
 				.getWorldDirection(new THREE.Vector3())
 				.negate(),
 		);
+		this.ui.raycaster.rayLength = 2;
 
 		if (rightController.gamepad.getButtonDown(BUTTONS.XR_STANDARD.SQUEEZE)) {
 			if (this.ui.container.position.x > 100) {

@@ -175,6 +175,10 @@ export class GenerateButtonSystem extends GameSystem {
 		);
 
 		if (intersects.length > 0) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersects[0].distance,
+			);
 			if (selectState) {
 				this.generateButton.setState('selected');
 			} else {

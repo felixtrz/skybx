@@ -1,16 +1,16 @@
 import './styles/index.css';
 
 import { CategoryComponent, CategoryPanelSystem } from './CategoryPanelSystem';
-import { Core, GameObject, GameSystem, THREE, VRButton } from 'elixr';
+import { Core, GameObject, THREE, VRButton } from 'elixr';
 import { KeyboardInputComponent, KeyboardSystem } from './KeyboardSystem';
 import { SkyboxComponent, SkyboxLoadingSystem } from './SkyboxLoadingSystem';
 import { UIComponent, UISystem } from './UISystem';
 
 import { GenerateButtonSystem } from './GenerateButtonSystem';
 import { PromptPanelSystem } from './PromptPanelSystem';
+import { UIRenderSystem } from './UIRenderSystem';
 // import { SkyboxGenerationSystem } from './SkyboxGenerationSystem';
 import { landingPageLogic } from './landing';
-import { update as uiUpdate } from 'three-mesh-ui';
 
 Core.init(document.getElementById('scene-container')).then((core) => {
 	const game = new GameObject();
@@ -29,14 +29,7 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.registerGameSystem(PromptPanelSystem);
 	core.registerGameSystem(CategoryPanelSystem);
 	core.registerGameSystem(GenerateButtonSystem);
-
-	core.registerGameSystem(
-		class extends GameSystem {
-			update() {
-				uiUpdate();
-			}
-		},
-	);
+	core.registerGameSystem(UIRenderSystem);
 
 	const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 	const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, 1);

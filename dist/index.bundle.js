@@ -20606,6 +20606,10 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 		);
 
 		if (intersect && intersect.object.isUI) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersect.distance,
+			);
 			if (intersect.object !== this.selectedButton) {
 				if (selectState && intersect.object.currentState === 'hovered') {
 					if (intersect.object.states['selected']) {
@@ -20839,6 +20843,10 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 		);
 
 		if (intersects.length > 0) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersects[0].distance,
+			);
 			if (selectState) {
 				this.generateButton.setState('selected');
 			} else {
@@ -21001,6 +21009,10 @@ class KeyboardSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		);
 
 		if (intersect && intersect.object.isUI) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersect.distance,
+			);
 			if (selectState && intersect.object.currentState === 'hovered') {
 				if (intersect.object.states['selected'])
 					intersect.object.setState('selected');
@@ -21287,6 +21299,53 @@ __webpack_async_result__();
 
 /***/ }),
 
+/***/ "./src/UIRenderSystem.js":
+/*!*******************************!*\
+  !*** ./src/UIRenderSystem.js ***!
+  \*******************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "UIRenderSystem": () => (/* binding */ UIRenderSystem)
+/* harmony export */ });
+/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
+/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_UISystem__WEBPACK_IMPORTED_MODULE_0__, elixr__WEBPACK_IMPORTED_MODULE_1__]);
+([_UISystem__WEBPACK_IMPORTED_MODULE_0__, elixr__WEBPACK_IMPORTED_MODULE_1__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
+
+
+
+class UIRenderSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem {
+	init() {
+		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_0__.UIComponent);
+	}
+
+	update() {
+		(0,three_mesh_ui__WEBPACK_IMPORTED_MODULE_2__.update)();
+		if (!this.ui.targetRay || !this.ui.marker) return;
+		this.ui.targetRay.scale.set(1, 1, this.ui.raycaster.rayLength);
+		if (this.ui.raycaster.rayLength < 2) {
+			this.ui.marker.visible = true;
+			this.ui.marker.position.z = -this.ui.raycaster.rayLength;
+		} else {
+			this.ui.marker.visible = false;
+		}
+	}
+}
+
+UIRenderSystem.queries = {
+	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_0__.UIComponent] },
+};
+
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
 /***/ "./src/UISystem.js":
 /*!*************************!*\
   !*** ./src/UISystem.js ***!
@@ -21315,6 +21374,8 @@ class UIComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
 UIComponent.schema = {
 	container: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
 	raycaster: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
+	targetRay: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
+	marker: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
 };
 
 class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
@@ -21326,6 +21387,12 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		this.ui.raycaster.far = 2;
 		this.isFollowing = false;
 		this.followingSpeed = 0;
+		this.ui.marker = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Mesh(
+			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.SphereGeometry(0.008, 32, 32),
+			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.MeshBasicMaterial({
+				color: 0xffffff,
+			}),
+		);
 	}
 
 	update(delta, _time) {
@@ -21333,25 +21400,22 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		if (!rightController) return;
 
 		if (!this.ui.container.parent) {
-			this.core.scene.add(this.ui.container);
+			this.core.playerSpace.add(this.ui.container);
 		}
-		if (!rightController.targetRay) {
-			const geometry = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.BufferGeometry();
-			geometry.setAttribute(
-				'position',
-				new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Float32BufferAttribute([0, 0, 0, 0, 0, -2], 3),
-			);
-			geometry.setAttribute(
-				'color',
-				new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Float32BufferAttribute([0.5, 0.5, 0.5, 0, 0, 0], 3),
-			);
+		if (!this.ui.targetRay) {
 			const material = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.LineBasicMaterial({
-				vertexColors: true,
-				blending: elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.AdditiveBlending,
+				color: 0xffffff,
 			});
 
-			rightController.targetRay = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Line(geometry, material);
-			rightController.targetRaySpace.add(rightController.targetRay);
+			const points = [];
+			points.push(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, 0));
+			points.push(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, -1));
+
+			const geometry = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.BufferGeometry().setFromPoints(points);
+
+			this.ui.targetRay = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Line(geometry, material);
+			rightController.targetRaySpace.add(this.ui.targetRay);
+			rightController.targetRaySpace.add(this.ui.marker);
 		}
 
 		this.ui.raycaster.set(
@@ -21360,6 +21424,7 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 				.getWorldDirection(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3())
 				.negate(),
 		);
+		this.ui.raycaster.rayLength = 2;
 
 		if (rightController.gamepad.getButtonDown(elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.SQUEEZE)) {
 			if (this.ui.container.position.x > 100) {
@@ -21491,10 +21556,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
 /* harmony import */ var _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./GenerateButtonSystem */ "./src/GenerateButtonSystem.js");
 /* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
-/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
-/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__]);
-([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
+/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__]);
+([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -21506,7 +21572,6 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_Cat
 
 
 // import { SkyboxGenerationSystem } from './SkyboxGenerationSystem';
-
 
 
 elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-container')).then((core) => {
@@ -21526,14 +21591,7 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__.PromptPanelSystem);
 	core.registerGameSystem(_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__.CategoryPanelSystem);
 	core.registerGameSystem(_GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__.GenerateButtonSystem);
-
-	core.registerGameSystem(
-		class extends elixr__WEBPACK_IMPORTED_MODULE_2__.GameSystem {
-			update() {
-				(0,three_mesh_ui__WEBPACK_IMPORTED_MODULE_9__.update)();
-			}
-		},
-	);
+	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__.UIRenderSystem);
 
 	const directionalLight = new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.DirectionalLight(0xffffff, 1);
 	const hemisphereLight = new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.HemisphereLight(0xffffff, 0x000000, 1);
@@ -21550,7 +21608,7 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 		},
 	});
 
-	(0,_landing__WEBPACK_IMPORTED_MODULE_8__.landingPageLogic)();
+	(0,_landing__WEBPACK_IMPORTED_MODULE_9__.landingPageLogic)();
 });
 
 __webpack_async_result__();

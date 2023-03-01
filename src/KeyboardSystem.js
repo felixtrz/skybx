@@ -114,6 +114,10 @@ export class KeyboardSystem extends XRGameSystem {
 		);
 
 		if (intersect && intersect.object.isUI) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersect.distance,
+			);
 			if (selectState && intersect.object.currentState === 'hovered') {
 				if (intersect.object.states['selected'])
 					intersect.object.setState('selected');
