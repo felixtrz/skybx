@@ -1,4 +1,11 @@
 export const landingPageLogic = () => {
+	const webLaunchButton = document.getElementById('web-launch-button');
+	webLaunchButton.onclick = () => {
+		window.open(
+			'https://www.oculus.com/open_url/?url=' +
+				encodeURIComponent(window.location.href),
+		);
+	};
 	const foldLinksButton = document.getElementById('fold-links');
 	const foldLinksVerticalLine = foldLinksButton.getElementsByClassName(
 		'fold-vertical-line',

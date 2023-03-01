@@ -21598,6 +21598,8 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	core.scene.add(directionalLight, hemisphereLight);
 
 	const vrButton = document.getElementById('vr-button');
+	const webLaunchButton = document.getElementById('web-launch-button');
+	webLaunchButton.style.display = 'none';
 	elixr__WEBPACK_IMPORTED_MODULE_2__.VRButton.convertToVRButton(vrButton, core.renderer, {
 		VR_NOT_ALLOWED_TEXT: 'VR BLOCKED',
 		VR_NOT_SUPPORTED_TEXT: 'VR UNSUPPORTED',
@@ -21605,6 +21607,7 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 		onSessionEnded: () => {},
 		onUnsupported: () => {
 			vrButton.style.display = 'none';
+			webLaunchButton.style.display = 'block';
 		},
 	});
 
@@ -21627,6 +21630,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "landingPageLogic": () => (/* binding */ landingPageLogic)
 /* harmony export */ });
 const landingPageLogic = () => {
+	const webLaunchButton = document.getElementById('web-launch-button');
+	webLaunchButton.onclick = () => {
+		window.open(
+			'https://www.oculus.com/open_url/?url=' +
+				encodeURIComponent(window.location.href),
+		);
+	};
 	const foldLinksButton = document.getElementById('fold-links');
 	const foldLinksVerticalLine = foldLinksButton.getElementsByClassName(
 		'fold-vertical-line',

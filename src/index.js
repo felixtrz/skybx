@@ -36,6 +36,8 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.scene.add(directionalLight, hemisphereLight);
 
 	const vrButton = document.getElementById('vr-button');
+	const webLaunchButton = document.getElementById('web-launch-button');
+	webLaunchButton.style.display = 'none';
 	VRButton.convertToVRButton(vrButton, core.renderer, {
 		VR_NOT_ALLOWED_TEXT: 'VR BLOCKED',
 		VR_NOT_SUPPORTED_TEXT: 'VR UNSUPPORTED',
@@ -43,6 +45,7 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 		onSessionEnded: () => {},
 		onUnsupported: () => {
 			vrButton.style.display = 'none';
+			webLaunchButton.style.display = 'block';
 		},
 	});
 
