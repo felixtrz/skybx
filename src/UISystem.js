@@ -1,5 +1,10 @@
 import { BUTTONS, GameComponent, THREE, Types, XRGameSystem } from 'elixr';
 
+import { applyPDScalar } from './pdAccelerations';
+
+const Y_DIFF_THRESHOLD = 0.1;
+const Y_CONVERGE_THRESHOLD = 0.01;
+
 export class UIComponent extends GameComponent {}
 
 UIComponent.schema = {
@@ -11,12 +16,14 @@ export class UISystem extends XRGameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(UIComponent);
 		this.ui.container = new THREE.Group();
-		this.ui.container.position.set(0, 1.1, -1);
+		this.ui.container.position.set(0, 1.7, 0);
 		this.ui.raycaster = new THREE.Raycaster();
 		this.ui.raycaster.far = 2;
+		this.isFollowing = false;
+		this.followingSpeed = 0;
 	}
 
-	update() {
+	update(delta, _time) {
 		const rightController = this.core.controllers['right'];
 		if (!rightController) return;
 
@@ -54,6 +61,35 @@ export class UISystem extends XRGameSystem {
 				this.ui.container.position.x = 0;
 			} else {
 				this.ui.container.position.x = 1000;
+			}
+		}
+
+		if (
+			!this.isFollowing &&
+			Math.abs(this.ui.container.position.y - this.core.playerHead.position.y) >
+				Y_DIFF_THRESHOLD
+		) {
+			this.isFollowing = true;
+		}
+
+		if (this.isFollowing) {
+			const [newSpeed, newY] = applyPDScalar(
+				this.ui.container.position.y,
+				this.followingSpeed,
+				this.core.playerHead.position.y,
+				0,
+				0.8,
+				1,
+				delta,
+			);
+			this.ui.container.position.y = newY;
+			this.followingSpeed = newSpeed;
+			if (
+				Math.abs(
+					this.ui.container.position.y - this.core.playerHead.position.y,
+				) < Y_CONVERGE_THRESHOLD
+			) {
+				this.isFollowing = false;
 			}
 		}
 	}

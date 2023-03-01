@@ -86,18 +86,6 @@ export class SkyboxLoadingSystem extends GameSystem {
 							(texture) => {
 								this.newTexture = texture;
 								this.state = ANIMATION_STATES.Ready;
-								if (this.sphere) {
-									this.core.scene.remove(this.sphere);
-								}
-								const material = new THREE.MeshBasicMaterial({
-									map: texture,
-									side: THREE.BackSide,
-								});
-								this.sphere = new THREE.Mesh(SKYBOX_GEOMETRY, material);
-								this.sphere.frustumCulled = false;
-								this.core.scene.add(this.sphere);
-
-								console.log('skybox loaded', skyboxComponent.currentId);
 							},
 							undefined,
 							function () {

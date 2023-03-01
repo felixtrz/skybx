@@ -27,7 +27,7 @@ export class CategoryPanelSystem extends XRGameSystem {
 		});
 		categoryPanel.rotateY(Math.PI / 8);
 		this.ui.container.add(categoryPanel);
-		categoryPanel.position.set(-0.8, 0.4, -0.01);
+		categoryPanel.position.set(-0.8, -0.1, -1.01);
 
 		const buttonOptions = {
 			width: 0.17,

@@ -20494,7 +20494,7 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 		});
 		categoryPanel.rotateY(Math.PI / 8);
 		this.ui.container.add(categoryPanel);
-		categoryPanel.position.set(-0.8, 0.4, -0.01);
+		categoryPanel.position.set(-0.8, -0.1, -1.01);
 
 		const buttonOptions = {
 			width: 0.17,
@@ -20715,7 +20715,7 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 			borderRadius: 0.03,
 		});
 		rightPanel.rotateY(-Math.PI / 8);
-		rightPanel.position.set(0.8, 0.4, -0.01);
+		rightPanel.position.set(0.8, -0.1, -1.01);
 
 		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
 			width: 1,
@@ -20914,6 +20914,7 @@ class KeyboardSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		});
 		this.keyboard.rotateX(-Math.PI / 6);
 		this.ui.container.add(this.keyboard);
+		this.keyboard.position.set(0, -0.5, -1);
 		this.keys = [];
 		this.text = '';
 		this.input = this.queryGameObjects('input')[0].getMutableComponent(
@@ -21067,7 +21068,7 @@ class PromptPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem 
 			backgroundOpacity: 1,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, 0.4, -0.12);
+		textPanel.position.set(0, -0.1, -1.12);
 
 		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block({
 			width: 1,
@@ -21211,18 +21212,6 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 							(texture) => {
 								this.newTexture = texture;
 								this.state = ANIMATION_STATES.Ready;
-								if (this.sphere) {
-									this.core.scene.remove(this.sphere);
-								}
-								const material = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.MeshBasicMaterial({
-									map: texture,
-									side: elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.BackSide,
-								});
-								this.sphere = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Mesh(SKYBOX_GEOMETRY, material);
-								this.sphere.frustumCulled = false;
-								this.core.scene.add(this.sphere);
-
-								console.log('skybox loaded', skyboxComponent.currentId);
 							},
 							undefined,
 							function () {
@@ -21311,9 +21300,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "UISystem": () => (/* binding */ UISystem)
 /* harmony export */ });
 /* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
+/* harmony import */ var _pdAccelerations__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pdAccelerations */ "./src/pdAccelerations.js");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__]);
 elixr__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
+
+
+
+const Y_DIFF_THRESHOLD = 0.1;
+const Y_CONVERGE_THRESHOLD = 0.01;
 
 class UIComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
 
@@ -21326,12 +21321,14 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(UIComponent);
 		this.ui.container = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Group();
-		this.ui.container.position.set(0, 1.1, -1);
+		this.ui.container.position.set(0, 1.7, 0);
 		this.ui.raycaster = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Raycaster();
 		this.ui.raycaster.far = 2;
+		this.isFollowing = false;
+		this.followingSpeed = 0;
 	}
 
-	update() {
+	update(delta, _time) {
 		const rightController = this.core.controllers['right'];
 		if (!rightController) return;
 
@@ -21369,6 +21366,35 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 				this.ui.container.position.x = 0;
 			} else {
 				this.ui.container.position.x = 1000;
+			}
+		}
+
+		if (
+			!this.isFollowing &&
+			Math.abs(this.ui.container.position.y - this.core.playerHead.position.y) >
+				Y_DIFF_THRESHOLD
+		) {
+			this.isFollowing = true;
+		}
+
+		if (this.isFollowing) {
+			const [newSpeed, newY] = (0,_pdAccelerations__WEBPACK_IMPORTED_MODULE_1__.applyPDScalar)(
+				this.ui.container.position.y,
+				this.followingSpeed,
+				this.core.playerHead.position.y,
+				0,
+				0.8,
+				1,
+				delta,
+			);
+			this.ui.container.position.y = newY;
+			this.followingSpeed = newSpeed;
+			if (
+				Math.abs(
+					this.ui.container.position.y - this.core.playerHead.position.y,
+				) < Y_CONVERGE_THRESHOLD
+			) {
+				this.isFollowing = false;
 			}
 		}
 	}
@@ -21558,6 +21584,249 @@ const landingPageLogic = () => {
 		}
 	};
 };
+
+
+/***/ }),
+
+/***/ "./src/pdAccelerations.js":
+/*!********************************!*\
+  !*** ./src/pdAccelerations.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "applyPDScalar": () => (/* binding */ applyPDScalar),
+/* harmony export */   "applyPDVec3": () => (/* binding */ applyPDVec3),
+/* harmony export */   "calculatePDConvergingFrequency": () => (/* binding */ calculatePDConvergingFrequency),
+/* harmony export */   "calculatePDConvergingTime": () => (/* binding */ calculatePDConvergingTime),
+/* harmony export */   "computePDAcceleration": () => (/* binding */ computePDAcceleration)
+/* harmony export */ });
+function computePDAcceleration(
+	currentValue,
+	currentVelocity,
+	targetValue,
+	targetVelocity,
+	frequency,
+	damping,
+	dt,
+) {
+	const ks = frequency * frequency * 36.0;
+	const kd = frequency * damping * 9.0;
+	const scale = 1.0 / (1.0 + kd * dt + ks * dt * dt);
+
+	const ksI = ks * scale;
+	const kdI = (kd + ks * dt) * scale;
+
+	return (
+		ksI * (targetValue - currentValue) +
+		kdI * (targetVelocity - currentVelocity)
+	);
+}
+
+/**
+ *
+ * @param {THREE.Vector3} currentValue
+ * @param {THREE.Vector3} currentVelocity
+ * @param {THREE.Vector3} targetValue
+ * @param {THREE.Vector3} targetVelocity
+ * @param {*} frequency - time to reach target
+ * @param {*} damping - damping force, if less than 1.0 will produce overshoot
+ * @param {*} dt - delta time
+ */
+function applyPDVec3(
+	currentValue,
+	currentVelocity,
+	targetValue,
+	targetVelocity,
+	frequency,
+	damping,
+	dt,
+) {
+	let accelX = computePDAcceleration(
+		currentValue.x,
+		currentVelocity.x,
+		targetValue.x,
+		targetVelocity.x,
+		frequency,
+		damping,
+		dt,
+	);
+	let accelY = computePDAcceleration(
+		currentValue.y,
+		currentVelocity.y,
+		targetValue.y,
+		targetVelocity.y,
+		frequency,
+		damping,
+		dt,
+	);
+	let accelZ = computePDAcceleration(
+		currentValue.z,
+		currentVelocity.z,
+		targetValue.z,
+		targetVelocity.z,
+		frequency,
+		damping,
+		dt,
+	);
+
+	currentVelocity.x += accelX * dt;
+	currentVelocity.y += accelY * dt;
+	currentVelocity.z += accelZ * dt;
+
+	currentValue.x += currentVelocity.x * dt;
+	currentValue.y += currentVelocity.y * dt;
+	currentValue.z += currentVelocity.z * dt;
+}
+
+/**
+ * this function calculate the speed and value for a new frame to achieve a
+ * smooth transition from one scalar value to another.
+ * @param {Number} currentValue
+ * @param {Number} currentSpeed
+ * @param {Number} targetValue
+ * @param {Number} targetSpeed
+ * @param {*} frequency - determines the time it needs to converge on target.
+ * @param {*} damping - damping force, if less than 1.0 will produce overshoot
+ * @param {*} dt - delta time
+ * @returns
+ */
+function applyPDScalar(
+	currentValue,
+	currentSpeed,
+	targetValue,
+	targetSpeed,
+	frequency,
+	damping,
+	dt,
+) {
+	const accel = computePDAcceleration(
+		currentValue,
+		currentSpeed,
+		targetValue,
+		targetSpeed,
+		frequency,
+		damping,
+		dt,
+	);
+
+	const newSpeed = currentSpeed + accel * dt;
+
+	const newValue = currentValue + newSpeed * dt;
+
+	return [newSpeed, newValue];
+}
+
+const STEP_TIME = 0.01;
+
+/**
+ * calculate the converging time for given converging criteria
+ * EXPENSIVE, DO NOT RUN EVERY FRAME
+ * @param {Number} startValue
+ * @param {Number} startSpeed
+ * @param {Number} targetValue
+ * @param {Number} targetSpeed
+ * @param {Number} frequency - determines the time it needs to converge on target.
+ * @param {Number} damping - damping force, if less than 1.0 will produce overshoot
+ * @param {Number} maxBounces - max # of overshoots before considered as converged
+ * @param {Number} valueErrorThreshold - value error threshold for converging
+ * @param {Number} speedErrorThreshold - speed error threshold for converging
+ * @param {Number} maxTime - max time for transition
+ * @returns
+ */
+function calculatePDConvergingTime(
+	startValue,
+	startSpeed,
+	targetValue,
+	targetSpeed,
+	frequency,
+	damping,
+	maxBounces = 2,
+	valueErrorThreshold = 0.01,
+	speedErrorThreshold = 0.01,
+	maxTime = 10,
+) {
+	let currentSpeed = startSpeed;
+	let currentValue = startValue;
+	let previousValue = startValue;
+	let numBounces = -1;
+	for (let i = 0; i < maxTime / STEP_TIME; i++) {
+		previousValue = currentValue;
+		[currentSpeed, currentValue] = applyPDScalar(
+			currentValue,
+			currentSpeed,
+			targetValue,
+			targetSpeed,
+			frequency,
+			damping,
+			STEP_TIME,
+		);
+		if ((previousValue - targetValue) * (currentValue - targetValue) < 0) {
+			numBounces += 1;
+		}
+		if (numBounces >= maxBounces) {
+			return STEP_TIME * (i + 1);
+		} else if (
+			Math.abs(currentValue - targetValue) < valueErrorThreshold &&
+			Math.abs(currentSpeed - targetSpeed) < speedErrorThreshold
+		) {
+			return STEP_TIME * (i + 1);
+		}
+	}
+	return null;
+}
+
+/**
+ * calculate the frequency for transition to converge in target time, with given
+ * converging criteria
+ * EXPENSIVE, DO NOT RUN EVERY FRAME
+ * @param {*} startValue
+ * @param {*} startSpeed
+ * @param {*} targetValue
+ * @param {*} targetSpeed
+ * @param {Number} damping - damping force, if less than 1.0 will produce overshoot
+ * @param {*} targetTime - target time of convergence
+ * @param {Number} maxBounces - max # of overshoots before considered as converged
+ * @param {Number} valueErrorThreshold - value error threshold for converging
+ * @param {Number} speedErrorThreshold - speed error threshold for converging
+ * @param {Number} maxTime - max time for transition
+ * @param {Number} cycles - higher cycles produce more precise result
+ * @returns
+ */
+function calculatePDConvergingFrequency(
+	startValue,
+	startSpeed,
+	targetValue,
+	targetSpeed,
+	damping,
+	targetTime,
+	maxBounces = 2,
+	valueErrorThreshold = 0.01,
+	speedErrorThreshold = 0.01,
+	maxTime = 10,
+	cycles = 2,
+) {
+	let freq = 1;
+
+	for (let i = 0; i < cycles; i++) {
+		let time = calculatePDConvergingTime(
+			startValue,
+			startSpeed,
+			targetValue,
+			targetSpeed,
+			freq,
+			damping,
+			maxBounces,
+			valueErrorThreshold,
+			speedErrorThreshold,
+			maxTime,
+		);
+		freq *= time / targetTime;
+	}
+
+	return freq;
+}
 
 
 /***/ }),

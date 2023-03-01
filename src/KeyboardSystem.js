@@ -27,6 +27,7 @@ export class KeyboardSystem extends XRGameSystem {
 		});
 		this.keyboard.rotateX(-Math.PI / 6);
 		this.ui.container.add(this.keyboard);
+		this.keyboard.position.set(0, -0.5, -1);
 		this.keys = [];
 		this.text = '';
 		this.input = this.queryGameObjects('input')[0].getMutableComponent(

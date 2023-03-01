@@ -20,7 +20,7 @@ export class PromptPanelSystem extends XRGameSystem {
 			backgroundOpacity: 1,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, 0.4, -0.12);
+		textPanel.position.set(0, -0.1, -1.12);
 
 		const title = new Block({
 			width: 1,

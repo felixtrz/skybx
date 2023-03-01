@@ -51,7 +51,7 @@ export class GenerateButtonSystem extends GameSystem {
 			borderRadius: 0.03,
 		});
 		rightPanel.rotateY(-Math.PI / 8);
-		rightPanel.position.set(0.8, 0.4, -0.01);
+		rightPanel.position.set(0.8, -0.1, -1.01);
 
 		const title = new Block({
 			width: 1,
