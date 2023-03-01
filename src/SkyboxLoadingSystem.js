@@ -1,6 +1,13 @@
 import { GameComponent, GameSystem, THREE, Types } from 'elixr';
 
-const SKYBOX_GEOMETRY = new THREE.SphereGeometry(500, 32, 32);
+const SKYBOX_GEOMETRY = new THREE.SphereGeometry(500, 128, 128);
+const ANIMATION_DURATION = 1;
+const ANIMATION_STATES = {
+	Ready: 'ready',
+	Idle: 'idle',
+	Vanishing: 'vanishing',
+	Appearing: 'appearing',
+};
 
 const myHeaders = new Headers();
 myHeaders.append('Accept', 'application/json, text/plain, */*');
@@ -33,6 +40,19 @@ export class SkyboxLoadingSystem extends GameSystem {
 		this.fetchInProgress = false;
 		this.sphere = null;
 		this.core.inlineCamera.far = 1000;
+		this.mask = new THREE.Mesh(
+			new THREE.IcosahedronGeometry(520, 2),
+			new THREE.MeshBasicMaterial({
+				color: 0x000000,
+				side: THREE.BackSide,
+			}),
+		);
+		this.mask.frustumCulled = false;
+		this.core.scene.add(this.mask);
+		this.newTexture = null;
+		this.state = 'idle';
+		this.prevState = 'idle';
+		this.animationTimer = 0;
 	}
 
 	update(delta, _time) {
@@ -64,6 +84,8 @@ export class SkyboxLoadingSystem extends GameSystem {
 						loader.load(
 							skyboxUrl,
 							(texture) => {
+								this.newTexture = texture;
+								this.state = ANIMATION_STATES.Ready;
 								if (this.sphere) {
 									this.core.scene.remove(this.sphere);
 								}
@@ -100,6 +122,44 @@ export class SkyboxLoadingSystem extends GameSystem {
 					}
 				})
 				.catch((error) => console.log('error', error));
+		}
+
+		if (this.state === ANIMATION_STATES.Ready) {
+			this.state = ANIMATION_STATES.Vanishing;
+			this.animationTimer = ANIMATION_DURATION;
+		} else if (this.state === ANIMATION_STATES.Vanishing) {
+			this.animationTimer -= delta;
+			if (this.animationTimer <= 0) {
+				this.state = ANIMATION_STATES.Appearing;
+				this.animationTimer = ANIMATION_DURATION;
+
+				if (this.sphere) {
+					this.core.scene.remove(this.sphere);
+				}
+				const material = new THREE.MeshBasicMaterial({
+					map: this.newTexture,
+					side: THREE.BackSide,
+				});
+				this.sphere = new THREE.Mesh(SKYBOX_GEOMETRY, material);
+				this.sphere.frustumCulled = false;
+				this.core.scene.add(this.sphere);
+
+				console.log('skybox loaded', skyboxComponent.currentId);
+			} else {
+				this.mask.scale.setScalar(
+					(this.animationTimer / ANIMATION_DURATION) * 0.05 + 0.95,
+				);
+			}
+		} else if (this.state === ANIMATION_STATES.Appearing) {
+			this.animationTimer -= delta;
+			if (this.animationTimer <= 0) {
+				this.state = ANIMATION_STATES.Idle;
+				this.mask.scale.setScalar(1);
+			} else {
+				this.mask.scale.setScalar(
+					(1 - this.animationTimer / ANIMATION_DURATION) * 0.05 + 0.95,
+				);
+			}
 		}
 	}
 }
