@@ -120,7 +120,8 @@ export class GenerateButtonSystem extends GameSystem {
 			},
 			onSet: () => {
 				const raw = JSON.stringify({
-					prompt: generatePrompt(this.input.text, this.category.key),
+					prompt: this.input.text.length > 0 ? this.input.text : 'nothing',
+					styleId: PROMPT_CATEGORIES[this.category.key].styleId,
 				});
 
 				this.requestOptions.body = raw;
@@ -195,9 +196,4 @@ GenerateButtonSystem.queries = {
 	input: { components: [KeyboardInputComponent] },
 	category: { components: [CategoryComponent] },
 	skybox: { components: [SkyboxComponent] },
-};
-
-const generatePrompt = (text, category) => {
-	const template = PROMPT_CATEGORIES[category];
-	return template[0] + text + template[1];
 };
