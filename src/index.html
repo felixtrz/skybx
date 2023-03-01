@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, shrink-to-fit=no"
+		/>
+		<title>SKYBX</title>
+		<script src="spw/simple-peer-wrapper.min.js"></script>
+		<!-- CSS only -->
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+			crossorigin="anonymous"
+		/>
+		<!-- JavaScript Bundle with Popper -->
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+			crossorigin="anonymous"
+		></script>
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="https://elixrjs.io/favicon.ico"
+		/>
+	</head>
+	<body style="margin: 0">
+		<div id="scene-container" style="display: block"></div>
+		<!-- <div style="position: fixed; right: 10px; bottom: 10px">
+			<button id="vr-button">Enter VR</button>
+		</div> -->
+
+		<div class="nav-bar">
+			<div class="icon-outer">
+				<div class="icon-inner"></div>
+			</div>
+			<div class="app-name">SKYBX</div>
+			<div class="nav-links">
+				<a href="https://skybox.blockadelabs.com/" target="_blank"
+					>BlockadeLabs</a
+				>
+			</div>
+			<button id="fold-links" class="fold">
+				<div class="fold-vertical-line"></div>
+				<div class="fold-horizontal-line"></div>
+			</button>
+			<div class="links-panel">
+				<a href="https://skybox.blockadelabs.com/" target="_blank"
+					>BlockadeLabs</a
+				>
+			</div>
+		</div>
+
+		<div id="ui-panel" class="card">
+			<div class="card-body">
+				<div id="welcome-text">
+					<h3 class="card-title">Welcome to SKYBX</h3>
+					<p class="card-subtitle mb-2" style="color: #a7a7a7">
+						Welcome to our SKYBX, where you can generate and explore unique
+						worlds using the magic of AI. Powered by Blockade Labs, SKYBX allows
+						you to enter a prompt and generate a world in real-time, which you
+						can then experience in full 3D immersive VR. With stunning graphics
+						and highly interactive environments, our WebXR experience provides a
+						one-of-a-kind experience that is sure to capture your imagination.
+					</p>
+					<p class="card-subtitle mb-2" style="color: #a7a7a7">
+						Built with love by
+						<a href="https://twitter.com/felix_trz/" target="_blank">Felix Z</a>
+						with
+						<a href="https://elixrjs.io/" target="_blank">Elixr engine</a>
+					</p>
+				</div>
+
+				<div class="row">
+					<div>
+						<button id="vr-button" type="button" class="btn action-button">
+							ENTER VR
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

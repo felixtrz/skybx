@@ -1,0 +1,269 @@
+@import url('https://fonts.cdnfonts.com/css/space-mono');
+
+#scene-container {
+	width: 100%;
+	height: 70vh;
+}
+
+.nav-bar {
+	font-family: 'Space Mono', sans-serif;
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	background-color: #333333;
+	width: calc(100vw - 20px);
+	height: 50px;
+	border-radius: 25px;
+	opacity: 0.8;
+	transition: opacity 0.7s;
+}
+
+.nav-bar:hover {
+	opacity: 1;
+}
+
+.app-name {
+	position: absolute;
+	font-weight: lighter !important;
+	top: 0;
+	left: 60px;
+	font-size: 32px;
+	color: #ffffff;
+	letter-spacing: 0.6rem;
+}
+
+.nav-links {
+	position: absolute;
+	top: 12px;
+	right: 5px;
+}
+
+.nav-links a,
+.links-panel a {
+	color: #ffffff;
+	font-size: 18px;
+	letter-spacing: 0.15rem;
+	text-decoration: none;
+	padding-right: 15px;
+}
+
+.nav-links a:hover {
+	text-decoration: underline;
+}
+
+.icon-outer {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	width: 40px;
+	height: 40px;
+	border: 5px solid #8f00ff;
+	border-radius: 50% 0 50% 50%;
+	transition: transform 0.7s ease-in-out;
+}
+
+.nav-bar:hover .icon-outer {
+	transform: rotate(45deg);
+}
+
+.icon-inner {
+	position: absolute;
+	top: 7px;
+	left: 11px;
+	width: 8px;
+	height: 16px;
+	border-radius: 4px;
+	background-color: #777777;
+}
+
+.main-box {
+	position: fixed;
+	width: 25rem;
+	height: 25rem;
+	top: calc((100vh - 25rem) / 2);
+	left: calc((100vw - 25rem) / 2);
+}
+
+.intro-box {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 25rem;
+	height: calc(22rem - 5px);
+	background-color: #333333;
+	border-radius: 25px 25px 0px 25px;
+	opacity: 1;
+	color: white;
+}
+
+#ui-panel {
+	position: fixed;
+	bottom: 0;
+	/* left: 20px;
+	width: calc(100vw - 40px); */
+	border-radius: 0;
+	color: white;
+	background-color: #333333;
+	opacity: 0.9;
+	width: 100vw;
+	transition: all 0.7s;
+}
+
+#ui-panel:hover {
+	opacity: 1;
+}
+
+.action-button {
+	color: #a7a7a7;
+	border-color: #a7a7a7;
+	border-radius: 0;
+	margin-right: 5px;
+	margin-top: 5px;
+}
+
+.action-button:hover {
+	color: #ffffff;
+	border-color: #8f00ff;
+	background-color: #8f00ff;
+}
+
+#gravity-controls {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	width: calc(100vw - 20px);
+	padding: 15px 20px;
+	background-color: #333333;
+	border-radius: 25px;
+	opacity: 0;
+	transition: all 0.3s;
+}
+
+.gravity-sliders {
+	font-size: 0;
+}
+
+.gravity-slider {
+	appearance: none;
+	width: calc((100% - 110px) / 3);
+	height: 10px;
+	background: #d3d3d3;
+	outline: none;
+	opacity: 0.9;
+	border-radius: 5px;
+	transition: opacity 0.2s;
+	padding: 8px;
+	margin-right: 10px;
+}
+
+.gravity-slider:last-child {
+	margin-right: 0;
+}
+
+#gravity-controls > h4 {
+	color: #ffffff;
+	padding-right: 24px;
+}
+
+.gravity-slider:hover {
+	opacity: 1;
+}
+
+.gravity-slider::-webkit-slider-thumb {
+	appearance: none;
+	width: 8px;
+	height: 16px;
+	background: #8f00ff;
+	cursor: pointer;
+}
+
+.gravity-slider::-moz-range-thumb {
+	width: 8px;
+	height: 16px;
+	background: #8f00ff;
+	cursor: pointer;
+}
+
+.slider-label {
+	color: #ffffff;
+	font-size: 20px;
+	height: 16px;
+	width: 20px;
+	margin-right: 10px;
+	display: inline-block;
+	text-align: center;
+}
+
+.fold {
+	border: none;
+	background-color: transparent;
+	font-family: 'Space Mono', sans-serif;
+	max-width: 20px !important;
+	height: 20px;
+	color: #ffffff;
+	padding: auto;
+}
+
+.fold-vertical-line {
+	position: absolute;
+	top: 0;
+	right: 8px;
+	width: 4px;
+	height: 20px;
+	background-color: #ffffff;
+}
+
+.fold-horizontal-line {
+	position: absolute;
+	top: 8px;
+	right: 0px;
+	width: 20px;
+	height: 4px;
+	background-color: #ffffff;
+}
+
+#fold-gravity-controls {
+	position: absolute;
+	top: 16px;
+	right: 24px;
+}
+
+#fold-links {
+	display: none;
+	position: absolute;
+	top: 15px;
+	right: 20px;
+}
+
+.links-panel {
+	display: none;
+}
+
+@media only screen and (max-width: 500px) {
+	#fold-links {
+		display: block;
+	}
+
+	.nav-links {
+		display: none;
+	}
+
+	.links-panel {
+		display: none;
+		background-color: #333333;
+		border-radius: 25px;
+		position: absolute;
+		top: 56px;
+		right: 0;
+	}
+
+	.links-panel > a {
+		display: block;
+		padding: 10px 20px;
+	}
+
+	.gravity-slider {
+		width: calc(100% - 30px);
+		margin: 8px 0;
+	}
+}
