@@ -25,7 +25,7 @@ SkyboxComponent.schema = {
 	},
 	requestedId: {
 		type: Types.String,
-		default: 'b6be8e42d4cd168ce4976edc31ae2028',
+		default: 'a5e75cc559613840906e9d4ee1935589',
 	},
 };
 
