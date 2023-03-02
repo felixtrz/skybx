@@ -126,6 +126,10 @@ export class GenerateButtonSystem extends GameSystem {
 
 				this.requestOptions.body = raw;
 
+				fetch('https://api.countapi.xyz/hit/felixtrz-skybx/gen', {
+					method: 'GET',
+				});
+
 				fetch(
 					'https://assetforger.blockadelabs.com/api/skybox/generateSkyboxImage',
 					this.requestOptions,

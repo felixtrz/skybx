@@ -20,4 +20,30 @@ export const landingPageLogic = () => {
 			foldLinksVerticalLine.style.display = 'none';
 		}
 	};
+	fetch('https://api.countapi.xyz/hit/felixtrz-skybx/visit', {
+		method: 'GET',
+	});
+	const visitCounter = document.getElementById('visit-counter');
+	setInterval(() => {
+		fetch('https://api.countapi.xyz/get/felixtrz-skybx/visit', {
+			method: 'GET',
+		})
+			.then((response) => response.json())
+			.then((result) => {
+				visitCounter.innerHTML = result.value;
+			})
+			.catch((error) => console.log('error', error));
+	}, 1000);
+
+	const genCounter = document.getElementById('gen-counter');
+	setInterval(() => {
+		fetch('https://api.countapi.xyz/get/felixtrz-skybx/gen', {
+			method: 'GET',
+		})
+			.then((response) => response.json())
+			.then((result) => {
+				genCounter.innerHTML = result.value;
+			})
+			.catch((error) => console.log('error', error));
+	}, 1000);
 };

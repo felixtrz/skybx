@@ -267,3 +267,11 @@
 		margin: 8px 0;
 	}
 }
+
+.counter {
+	border-radius: 5px;
+	padding: 0 5px;
+	background-color: #ffffff !important;
+	color: #333333;
+	font-weight: bolder;
+}
