@@ -47,7 +47,7 @@ export class GenerateButtonSystem extends GameSystem {
 			width: 0.6,
 			height: 0.41,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
 		rightPanel.rotateY(-Math.PI / 8);
