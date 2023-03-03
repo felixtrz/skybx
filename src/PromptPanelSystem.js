@@ -15,12 +15,12 @@ export class PromptPanelSystem extends XRGameSystem {
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
 			width: 1,
-			height: 0.41,
+			height: 0.25,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, -0.1, -1.12);
+		textPanel.position.set(0, -0.18, -1.12);
 
 		const title = new Block({
 			width: 1,
@@ -28,7 +28,7 @@ export class PromptPanelSystem extends XRGameSystem {
 			justifyContent: 'center',
 			fontSize: 0.045,
 			backgroundOpacity: 0,
-		}).add(new Text({ content: 'Imagine:' }));
+		}).add(new Text({ content: 'Dream up your world:' }));
 
 		this.userText = new Text({ content: '' });
 

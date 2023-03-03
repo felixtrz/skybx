@@ -22,7 +22,7 @@ export class CategoryPanelSystem extends XRGameSystem {
 			width: 0.6,
 			height: 0.41,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
 		categoryPanel.rotateY(Math.PI / 8);

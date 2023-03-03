@@ -20447,6 +20447,72 @@ var __webpack_exports__update = __webpack_exports__.Vx;
 
 /***/ }),
 
+/***/ "./src/BannerPanelSystem.js":
+/*!**********************************!*\
+  !*** ./src/BannerPanelSystem.js ***!
+  \**********************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BannerPanelSystem": () => (/* binding */ BannerPanelSystem)
+/* harmony export */ });
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
+/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__]);
+([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
+
+
+
+
+
+class BannerPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
+	init() {
+		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent);
+
+		const textPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			fontFamily: 'assets/Roboto-msdf.json',
+			fontTexture: 'assets/Roboto-msdf.png',
+			width: 1,
+			height: 0.15,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
+			backgroundOpacity: 0.5,
+			borderRadius: 0.03,
+			textAlign: 'center',
+			justifyContent: 'center',
+		});
+		textPanel.position.set(0, 0.03, -1.12);
+
+		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			height: 0.13,
+			width: 0.92,
+			margin: 0,
+			padding: 0,
+			textAlign: 'center',
+		});
+
+		new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.TextureLoader().load('assets/logo.png', (texture) => {
+			title.set({ backgroundTexture: texture });
+		});
+
+		textPanel.add(title);
+		this.ui.container.add(textPanel);
+	}
+}
+
+BannerPanelSystem.queries = {
+	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent] },
+};
+
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
 /***/ "./src/CategoryPanelSystem.js":
 /*!************************************!*\
   !*** ./src/CategoryPanelSystem.js ***!
@@ -20489,7 +20555,7 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 			width: 0.6,
 			height: 0.41,
 			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
 		categoryPanel.rotateY(Math.PI / 8);
@@ -20715,28 +20781,15 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 			width: 0.6,
 			height: 0.41,
 			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
 		rightPanel.rotateY(-Math.PI / 8);
 		rightPanel.position.set(0.8, -0.1, -1.01);
 
-		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			width: 1,
-			height: 0.1,
-			justifyContent: 'center',
-			fontSize: 0.045,
-			backgroundOpacity: 0,
-			margin: 0.02,
-		}).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({
-				content: 'Powered by\nBlockade Labs',
-			}),
-		);
-
 		const instruction = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
 			width: 1,
-			height: 0.06,
+			height: 0.1,
 			justifyContent: 'center',
 			fontSize: 0.03,
 			backgroundOpacity: 0,
@@ -20747,9 +20800,110 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 			}),
 		);
 
-		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			width: 0.5,
+		const historyButtons = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			width: 0.6,
 			height: 0.12,
+			backgroundOpacity: 0,
+			contentDirection: 'row',
+			justifyContent: 'center',
+		});
+
+		const historyButtonConfig = {
+			width: 0.26,
+			height: 0.11,
+			justifyContent: 'center',
+			offset: 0.01,
+			margin: 0.01,
+			padding: 0,
+			borderRadius: 0.03,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+		};
+
+		const backButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(historyButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Back', fontSize: 0.04 }),
+		);
+
+		backButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		backButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		backButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
+				if (currentId == -1) {
+					if (this.skybox.history.length > 0) {
+						this.skybox.requestedId = this.skybox.history[
+							this.skybox.history.length - 1
+						];
+					}
+				} else if (currentId > 0) {
+					this.skybox.requestedId = this.skybox.history[currentId - 1];
+				}
+			},
+		});
+
+		const forwardButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(historyButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Forward', fontSize: 0.04 }),
+		);
+
+		forwardButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		forwardButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		forwardButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
+				if (currentId == -1 || currentId == this.skybox.history.length - 1)
+					return;
+				this.skybox.requestedId = this.skybox.history[currentId + 1];
+			},
+		});
+
+		historyButtons.add(backButton, forwardButton);
+
+		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			width: 0.55,
+			height: 0.11,
 			justifyContent: 'center',
 			offset: 0.01,
 			margin: 0.01,
@@ -20787,6 +20941,8 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 				backgroundOpacity: 1,
 			},
 			onSet: () => {
+				const generating = this.skybox.currentId !== this.skybox.requestedId;
+				if (generating) return;
 				const raw = JSON.stringify({
 					prompt: this.input.text.length > 0 ? this.input.text : 'nothing',
 					styleId: _constants__WEBPACK_IMPORTED_MODULE_2__.PROMPT_CATEGORIES[this.category.key].styleId,
@@ -20812,7 +20968,9 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 			},
 		});
 
-		rightPanel.add(title, instruction, this.generateButton);
+		rightPanel.add(instruction, historyButtons, this.generateButton);
+
+		this.buttons = [backButton, forwardButton, this.generateButton];
 		this.ui.container.add(rightPanel);
 
 		this.requestOptions = {
@@ -20837,29 +20995,42 @@ class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem
 		}
 		this.wasGenerating = generating;
 
-		if (generating) return;
+		const intersect = this.buttons.reduce((closestIntersection, obj) => {
+			const intersection = this.ui.raycaster.intersectObject(obj, true);
+			if (!intersection[0]) return closestIntersection;
+			if (
+				!closestIntersection ||
+				intersection[0].distance < closestIntersection.distance
+			) {
+				intersection[0].object = obj;
+				return intersection[0];
+			}
+			return closestIntersection;
+		}, null);
 
-		const intersects = this.ui.raycaster.intersectObject(
-			this.generateButton,
-			true,
-		);
 		const selectState = rightController.gamepad.getButtonUp(
 			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
 		);
 
-		if (intersects.length > 0) {
+		if (intersect && intersect.object.isUI) {
 			this.ui.raycaster.rayLength = Math.min(
 				this.ui.raycaster.rayLength,
-				intersects[0].distance,
+				intersect.distance,
 			);
-			if (selectState) {
-				this.generateButton.setState('selected');
-			} else {
-				this.generateButton.setState('hovered');
+			if (selectState && intersect.object.currentState === 'hovered') {
+				if (intersect.object.states['selected'])
+					intersect.object.setState('selected');
+			} else if (!selectState) {
+				if (intersect.object.states['hovered'])
+					intersect.object.setState('hovered');
 			}
-		} else {
-			this.generateButton.setState('idle');
 		}
+
+		this.buttons.forEach((obj) => {
+			if ((!intersect || obj !== intersect.object) && obj.isUI) {
+				if (obj.states['idle']) obj.setState('idle');
+			}
+		});
 	}
 }
 
@@ -21075,12 +21246,12 @@ class PromptPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem 
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
 			width: 1,
-			height: 0.41,
+			height: 0.25,
 			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_1__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
-			backgroundOpacity: 1,
+			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, -0.1, -1.12);
+		textPanel.position.set(0, -0.18, -1.12);
 
 		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block({
 			width: 1,
@@ -21088,7 +21259,7 @@ class PromptPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem 
 			justifyContent: 'center',
 			fontSize: 0.045,
 			backgroundOpacity: 0,
-		}).add(new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Imagine:' }));
+		}).add(new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Dream up your world:' }));
 
 		this.userText = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: '' });
 
@@ -21159,11 +21330,15 @@ class SkyboxComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {
 SkyboxComponent.schema = {
 	currentId: {
 		type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.String,
-		default: '',
+		default: null,
 	},
 	requestedId: {
 		type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.String,
 		default: 'a5e75cc559613840906e9d4ee1935589',
+	},
+	history: {
+		type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Array,
+		default: [],
 	},
 };
 
@@ -21217,6 +21392,11 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 					this.fetchTimeout = 2;
 					const skyboxUrl = JSON.parse(result).file_url;
 					if (skyboxUrl) {
+						if (
+							!skyboxComponent.history.includes(skyboxComponent.requestedId)
+						) {
+							skyboxComponent.history.push(skyboxComponent.requestedId);
+						}
 						skyboxComponent.currentId = skyboxComponent.requestedId;
 						const loader = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.TextureLoader();
 						loader.load(
@@ -21549,12 +21729,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./KeyboardSystem */ "./src/KeyboardSystem.js");
 /* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
-/* harmony import */ var _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./GenerateButtonSystem */ "./src/GenerateButtonSystem.js");
-/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
-/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
-/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__]);
-([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./BannerPanelSystem */ "./src/BannerPanelSystem.js");
+/* harmony import */ var _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./GenerateButtonSystem */ "./src/GenerateButtonSystem.js");
+/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
+/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
+/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__]);
+([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -21566,11 +21747,12 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_Cat
 
 
 
-// import { SkyboxGenerationSystem } from './SkyboxGenerationSystem';
+
 
 
 elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-container')).then((core) => {
 	const game = new elixr__WEBPACK_IMPORTED_MODULE_2__.GameObject();
+
 	core.registerGameComponent(_UISystem__WEBPACK_IMPORTED_MODULE_5__.UIComponent);
 	game.addComponent(_UISystem__WEBPACK_IMPORTED_MODULE_5__.UIComponent);
 	core.registerGameComponent(_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__.CategoryComponent);
@@ -21579,18 +21761,14 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	core.registerGameComponent(_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__.SkyboxComponent);
 	game.addComponent(_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__.SkyboxComponent);
 	core.registerGameSystem(_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__.SkyboxLoadingSystem);
-	// core.registerGameSystem(SkyboxGenerationSystem);
 	core.registerGameComponent(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardInputComponent);
 	game.addComponent(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardInputComponent);
 	core.registerGameSystem(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardSystem);
-	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__.PromptPanelSystem);
+	core.registerGameSystem(_BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__.BannerPanelSystem);
+	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__.PromptPanelSystem);
 	core.registerGameSystem(_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__.CategoryPanelSystem);
-	core.registerGameSystem(_GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_6__.GenerateButtonSystem);
-	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__.UIRenderSystem);
-
-	const directionalLight = new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.DirectionalLight(0xffffff, 1);
-	const hemisphereLight = new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.HemisphereLight(0xffffff, 0x000000, 1);
-	core.scene.add(directionalLight, hemisphereLight);
+	core.registerGameSystem(_GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__.GenerateButtonSystem);
+	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__.UIRenderSystem);
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');
@@ -21606,7 +21784,7 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 		},
 	});
 
-	(0,_landing__WEBPACK_IMPORTED_MODULE_9__.landingPageLogic)();
+	(0,_landing__WEBPACK_IMPORTED_MODULE_10__.landingPageLogic)();
 });
 
 __webpack_async_result__();
@@ -21649,29 +21827,36 @@ const landingPageLogic = () => {
 	fetch('https://api.countapi.xyz/hit/felixtrz-skybx/visit', {
 		method: 'GET',
 	});
-	const visitCounter = document.getElementById('visit-counter');
-	setInterval(() => {
-		fetch('https://api.countapi.xyz/get/felixtrz-skybx/visit', {
-			method: 'GET',
-		})
-			.then((response) => response.json())
-			.then((result) => {
-				visitCounter.innerHTML = result.value;
-			})
-			.catch((error) => console.log('error', error));
-	}, 1000);
 
-	const genCounter = document.getElementById('gen-counter');
-	setInterval(() => {
-		fetch('https://api.countapi.xyz/get/felixtrz-skybx/gen', {
-			method: 'GET',
+	fetchVisitCount();
+	setInterval(fetchVisitCount, 5000);
+
+	fetchGenCount();
+	setInterval(fetchGenCount, 5000);
+};
+
+const fetchVisitCount = () => {
+	const visitCounter = document.getElementById('visit-counter');
+	fetch('https://api.countapi.xyz/get/felixtrz-skybx/visit', {
+		method: 'GET',
+	})
+		.then((response) => response.json())
+		.then((result) => {
+			visitCounter.innerHTML = result.value;
 		})
-			.then((response) => response.json())
-			.then((result) => {
-				genCounter.innerHTML = result.value;
-			})
-			.catch((error) => console.log('error', error));
-	}, 1000);
+		.catch((error) => console.log('error', error));
+};
+
+const fetchGenCount = () => {
+	const genCounter = document.getElementById('gen-counter');
+	fetch('https://api.countapi.xyz/get/felixtrz-skybx/gen', {
+		method: 'GET',
+	})
+		.then((response) => response.json())
+		.then((result) => {
+			genCounter.innerHTML = result.value;
+		})
+		.catch((error) => console.log('error', error));
 };
 
 

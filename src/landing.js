@@ -23,27 +23,34 @@ export const landingPageLogic = () => {
 	fetch('https://api.countapi.xyz/hit/felixtrz-skybx/visit', {
 		method: 'GET',
 	});
-	const visitCounter = document.getElementById('visit-counter');
-	setInterval(() => {
-		fetch('https://api.countapi.xyz/get/felixtrz-skybx/visit', {
-			method: 'GET',
-		})
-			.then((response) => response.json())
-			.then((result) => {
-				visitCounter.innerHTML = result.value;
-			})
-			.catch((error) => console.log('error', error));
-	}, 1000);
 
-	const genCounter = document.getElementById('gen-counter');
-	setInterval(() => {
-		fetch('https://api.countapi.xyz/get/felixtrz-skybx/gen', {
-			method: 'GET',
+	fetchVisitCount();
+	setInterval(fetchVisitCount, 5000);
+
+	fetchGenCount();
+	setInterval(fetchGenCount, 5000);
+};
+
+const fetchVisitCount = () => {
+	const visitCounter = document.getElementById('visit-counter');
+	fetch('https://api.countapi.xyz/get/felixtrz-skybx/visit', {
+		method: 'GET',
+	})
+		.then((response) => response.json())
+		.then((result) => {
+			visitCounter.innerHTML = result.value;
 		})
-			.then((response) => response.json())
-			.then((result) => {
-				genCounter.innerHTML = result.value;
-			})
-			.catch((error) => console.log('error', error));
-	}, 1000);
+		.catch((error) => console.log('error', error));
+};
+
+const fetchGenCount = () => {
+	const genCounter = document.getElementById('gen-counter');
+	fetch('https://api.countapi.xyz/get/felixtrz-skybx/gen', {
+		method: 'GET',
+	})
+		.then((response) => response.json())
+		.then((result) => {
+			genCounter.innerHTML = result.value;
+		})
+		.catch((error) => console.log('error', error));
 };

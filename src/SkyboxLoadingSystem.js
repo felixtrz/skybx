@@ -21,11 +21,15 @@ export class SkyboxComponent extends GameComponent {}
 SkyboxComponent.schema = {
 	currentId: {
 		type: Types.String,
-		default: '',
+		default: null,
 	},
 	requestedId: {
 		type: Types.String,
 		default: 'a5e75cc559613840906e9d4ee1935589',
+	},
+	history: {
+		type: Types.Array,
+		default: [],
 	},
 };
 
@@ -79,6 +83,11 @@ export class SkyboxLoadingSystem extends GameSystem {
 					this.fetchTimeout = 2;
 					const skyboxUrl = JSON.parse(result).file_url;
 					if (skyboxUrl) {
+						if (
+							!skyboxComponent.history.includes(skyboxComponent.requestedId)
+						) {
+							skyboxComponent.history.push(skyboxComponent.requestedId);
+						}
 						skyboxComponent.currentId = skyboxComponent.requestedId;
 						const loader = new THREE.TextureLoader();
 						loader.load(
