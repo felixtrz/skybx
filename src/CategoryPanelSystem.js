@@ -26,7 +26,7 @@ export class CategoryPanelSystem extends XRGameSystem {
 			borderRadius: 0.03,
 		});
 		categoryPanel.rotateY(Math.PI / 8);
-		this.ui.container.add(categoryPanel);
+		this.ui.expandedUIContainer.add(categoryPanel);
 		categoryPanel.position.set(-0.8, -0.1, -1.01);
 
 		const buttonOptions = {
@@ -36,7 +36,7 @@ export class CategoryPanelSystem extends XRGameSystem {
 			offset: 0.01,
 			margin: 0.01,
 			padding: 0,
-			borderRadius: 0.04,
+			borderRadius: 0.03,
 			backgroundColor: new THREE.Color(COLORS.button),
 		};
 
@@ -44,7 +44,9 @@ export class CategoryPanelSystem extends XRGameSystem {
 
 		Object.keys(PROMPT_CATEGORIES).forEach((category) => {
 			const button = new Block(buttonOptions);
-			button.add(new Text({ content: category, fontSize: 0.04 }));
+			button.add(
+				new Text({ content: category, fontSize: 0.04, offset: 0.001 }),
+			);
 
 			button.setupState({
 				state: 'idle',

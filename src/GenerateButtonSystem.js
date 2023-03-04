@@ -237,7 +237,7 @@ export class GenerateButtonSystem extends GameSystem {
 		rightPanel.add(instruction, historyButtons, this.generateButton);
 
 		this.buttons = [backButton, forwardButton, this.generateButton];
-		this.ui.container.add(rightPanel);
+		this.ui.expandedUIContainer.add(rightPanel);
 
 		this.requestOptions = {
 			method: 'POST',

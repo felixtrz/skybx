@@ -15,12 +15,12 @@ export class PromptPanelSystem extends XRGameSystem {
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
 			width: 1,
-			height: 0.25,
+			height: 0.28,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, -0.18, -1.12);
+		textPanel.position.set(0, -0.165, -1.12);
 
 		const title = new Block({
 			width: 1,
@@ -41,7 +41,7 @@ export class PromptPanelSystem extends XRGameSystem {
 		}).add(this.userText);
 
 		textPanel.add(title, textField);
-		this.ui.container.add(textPanel);
+		this.ui.expandedUIContainer.add(textPanel);
 	}
 
 	update() {
