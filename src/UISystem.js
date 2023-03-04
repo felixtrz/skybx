@@ -9,15 +9,19 @@ export class UIComponent extends GameComponent {}
 
 UIComponent.schema = {
 	container: { type: Types.Ref, default: null },
+	expandedUIContainer: { type: Types.Ref, default: null },
 	raycaster: { type: Types.Ref, default: null },
 	targetRay: { type: Types.Ref, default: null },
 	marker: { type: Types.Ref, default: null },
+	selecting: { type: Types.Boolean, default: false },
 };
 
 export class UISystem extends XRGameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(UIComponent);
 		this.ui.container = new THREE.Group();
+		this.ui.expandedUIContainer = new THREE.Group();
+		this.ui.container.add(this.ui.expandedUIContainer);
 		this.ui.container.position.set(0, 1.7, 0);
 		this.ui.raycaster = new THREE.Raycaster();
 		this.ui.raycaster.far = 2;
@@ -62,13 +66,9 @@ export class UISystem extends XRGameSystem {
 		);
 		this.ui.raycaster.rayLength = 2;
 
-		if (rightController.gamepad.getButtonDown(BUTTONS.XR_STANDARD.SQUEEZE)) {
-			if (this.ui.container.position.x > 100) {
-				this.ui.container.position.x = 0;
-			} else {
-				this.ui.container.position.x = 1000;
-			}
-		}
+		this.ui.selecting = rightController.gamepad.getButtonUp(
+			BUTTONS.XR_STANDARD.TRIGGER,
+		);
 
 		if (
 			!this.isFollowing &&

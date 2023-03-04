@@ -23,6 +23,10 @@ SkyboxComponent.schema = {
 		type: Types.String,
 		default: null,
 	},
+	currentImageUrl: {
+		type: Types.String,
+		default: null,
+	},
 	requestedId: {
 		type: Types.String,
 		default: 'a5e75cc559613840906e9d4ee1935589',
@@ -89,6 +93,7 @@ export class SkyboxLoadingSystem extends GameSystem {
 							skyboxComponent.history.push(skyboxComponent.requestedId);
 						}
 						skyboxComponent.currentId = skyboxComponent.requestedId;
+						skyboxComponent.currentImageUrl = skyboxUrl;
 						const loader = new THREE.TextureLoader();
 						loader.load(
 							skyboxUrl,

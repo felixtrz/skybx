@@ -20461,51 +20461,251 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
 /* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
-/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__]);
-([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
+/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
+/* harmony import */ var _buttonUtil__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./buttonUtil */ "./src/buttonUtil.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_3__, _UISystem__WEBPACK_IMPORTED_MODULE_4__]);
+([elixr__WEBPACK_IMPORTED_MODULE_0__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_3__, _UISystem__WEBPACK_IMPORTED_MODULE_4__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
 
 
+
+
+
+const GENERATE_ICON_ROTATION_SPEED = -Math.PI;
+const EXPANDED_POSITION = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0.045, -1.12);
+const EXPANDED_QUATERNION = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Quaternion();
+const COLLAPSED_POSITION = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, -0.6, -0.8);
+const MENU_BAR_STATE = {
+	EXPANDED: 'expanded',
+	COLLAPSED: 'collapsed',
+	EXPANDING: 'expanding',
+	COLLAPSING: 'collapsing',
+};
+const CONVERGE_THRESHOLD = 0.001;
 
 class BannerPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 	init() {
-		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent);
+		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_4__.UIComponent);
+		this.skybox = this.queryGameObjects('skybox')[0].getComponent(
+			_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_3__.SkyboxComponent,
+		);
 
-		const textPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			fontFamily: 'assets/Roboto-msdf.json',
-			fontTexture: 'assets/Roboto-msdf.png',
+		const textureLoader = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.TextureLoader();
+
+		const menuBar = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
 			width: 1,
-			height: 0.15,
+			height: 0.12,
+			backgroundOpacity: 0,
+			margin: 0,
+			padding: 0,
+			justifyContent: 'center',
+			borderRadius: 0,
+			contentDirection: 'row',
+		});
+		menuBar.position.copy(EXPANDED_POSITION);
+
+		const bannerPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			width: 0.74,
+			height: 0.12,
 			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
 			backgroundOpacity: 0.5,
 			borderRadius: 0.03,
 			textAlign: 'center',
 			justifyContent: 'center',
+			offset: 0.001,
 		});
-		textPanel.position.set(0, 0.03, -1.12);
 
 		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			height: 0.13,
-			width: 0.92,
+			height: 0.1,
+			width: 0.66,
 			margin: 0,
 			padding: 0,
 			textAlign: 'center',
+			borderRadius: 0,
+			offset: 0.001,
 		});
 
-		new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.TextureLoader().load('assets/logo.png', (texture) => {
+		textureLoader.load('assets/logo.png', (texture) => {
 			title.set({ backgroundTexture: texture });
 		});
 
-		textPanel.add(title);
-		this.ui.container.add(textPanel);
+		bannerPanel.add(title);
+
+		const squareButtonConfig = {
+			height: 0.12,
+			width: 0.12,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
+			backgroundOpacity: 0.5,
+			borderRadius: 0.03,
+			textAlign: 'center',
+			justifyContent: 'center',
+			margin: 0.01,
+			offset: 0.001,
+		};
+
+		const buttonIconConfig = {
+			height: 0.1,
+			width: 0.1,
+			margin: 0,
+			padding: 0,
+			textAlign: 'center',
+			justifyContent: 'center',
+			borderRadius: 0,
+			offset: 0.001,
+		};
+
+		this.statusBlock = this._createStatusBlock(
+			textureLoader,
+			squareButtonConfig,
+			buttonIconConfig,
+		);
+
+		this.resizeButton = this._createResizeButton(
+			textureLoader,
+			squareButtonConfig,
+			buttonIconConfig,
+		);
+
+		menuBar.add(this.statusBlock, bannerPanel, this.resizeButton);
+		this.ui.container.add(menuBar);
+		this.buttons = [this.resizeButton];
+		this.menuBar = menuBar;
+
+		this.wasGenerating = true;
+	}
+
+	_createStatusBlock(textureLoader, squareButtonConfig, buttonIconConfig) {
+		const statusBlock = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(squareButtonConfig);
+		statusBlock.icon = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(JSON.parse(JSON.stringify(buttonIconConfig)));
+		statusBlock.add(statusBlock.icon);
+
+		textureLoader.load('assets/check-lg.png', (texture) => {
+			statusBlock.readyIconTexture = texture;
+		});
+
+		textureLoader.load('assets/arrow-repeat.png', (texture) => {
+			statusBlock.generatingIconTexture = texture;
+		});
+
+		return statusBlock;
+	}
+
+	_createResizeButton(textureLoader, squareButtonConfig, buttonIconConfig) {
+		const resizeButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(squareButtonConfig);
+		const icon = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(JSON.parse(JSON.stringify(buttonIconConfig)));
+		resizeButton.add(icon);
+		resizeButton.isExpanded = true;
+
+		textureLoader.load('assets/arrows-angle-contract.png', (texture) => {
+			resizeButton.contractIconTexture = texture;
+			icon.set({ backgroundTexture: texture });
+		});
+
+		textureLoader.load('assets/arrows-angle-expand.png', (texture) => {
+			resizeButton.expandIconTexture = texture;
+		});
+
+		resizeButton.setupState({
+			state: 'idle',
+			attributes: {
+				backgroundOpacity: 0.5,
+			},
+		});
+
+		resizeButton.setupState({
+			state: 'hovered',
+			attributes: {
+				backgroundOpacity: 0.7,
+			},
+		});
+
+		resizeButton.setupState({
+			state: 'selected',
+			attributes: {
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				if (resizeButton.isExpanded) {
+					icon.set({ backgroundTexture: resizeButton.expandIconTexture });
+					this.ui.expandedUIContainer.visible = false;
+					this.ui.expandedUIContainer.position.set(0, 0, -100);
+				} else {
+					icon.set({ backgroundTexture: resizeButton.contractIconTexture });
+				}
+				resizeButton.isExpanded = !resizeButton.isExpanded;
+			},
+		});
+
+		return resizeButton;
+	}
+
+	update(delta) {
+		this._updateStatusBlock(delta);
+		(0,_buttonUtil__WEBPACK_IMPORTED_MODULE_5__.updateButtons)(this.buttons, this.ui);
+		let menuBarState = '';
+		if (this.resizeButton.isExpanded) {
+			menuBarState =
+				this.menuBar.position.distanceTo(EXPANDED_POSITION) > CONVERGE_THRESHOLD
+					? MENU_BAR_STATE.EXPANDING
+					: MENU_BAR_STATE.EXPANDED;
+		} else {
+			menuBarState =
+				this.menuBar.position.distanceTo(COLLAPSED_POSITION) >
+				CONVERGE_THRESHOLD
+					? MENU_BAR_STATE.COLLAPSING
+					: MENU_BAR_STATE.COLLAPSED;
+		}
+
+		switch (menuBarState) {
+			case MENU_BAR_STATE.EXPANDING:
+				this.menuBar.position.lerp(EXPANDED_POSITION, 0.1);
+				this.menuBar.quaternion.slerp(EXPANDED_QUATERNION, 0.1);
+				break;
+			case MENU_BAR_STATE.EXPANDED:
+				if (this.menuBar.state !== MENU_BAR_STATE.EXPANDED) {
+					this.menuBar.position.copy(EXPANDED_POSITION);
+					this.menuBar.quaternion.copy(EXPANDED_QUATERNION);
+					this.ui.expandedUIContainer.visible = true;
+					this.ui.expandedUIContainer.position.set(0, 0, 0);
+				}
+				break;
+			case MENU_BAR_STATE.COLLAPSING:
+				this.menuBar.position.lerp(COLLAPSED_POSITION, 0.1);
+				this.menuBar.lookAt(this.core.playerHead.position);
+				break;
+			case MENU_BAR_STATE.COLLAPSED:
+				if (this.menuBar.state !== MENU_BAR_STATE.COLLAPSED) {
+					this.menuBar.position.copy(COLLAPSED_POSITION);
+				}
+				break;
+		}
+	}
+
+	_updateStatusBlock(delta) {
+		const generating = this.skybox.currentId !== this.skybox.requestedId;
+		if (generating && !this.wasGenerating) {
+			this.statusBlock.icon.set({
+				backgroundTexture: this.statusBlock.generatingIconTexture,
+			});
+		} else if (!generating && this.wasGenerating) {
+			this.statusBlock.icon.quaternion.set(0, 0, 0, 1);
+			this.statusBlock.icon.set({
+				backgroundTexture: this.statusBlock.readyIconTexture,
+			});
+		}
+		if (generating) {
+			this.statusBlock.icon.rotateZ(delta * GENERATE_ICON_ROTATION_SPEED);
+		}
+		this.wasGenerating = generating;
 	}
 }
 
 BannerPanelSystem.queries = {
-	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent] },
+	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_4__.UIComponent] },
+	skybox: { components: [_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_3__.SkyboxComponent] },
 };
 
 __webpack_async_result__();
@@ -20525,65 +20725,68 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "CategoryComponent": () => (/* binding */ CategoryComponent),
 /* harmony export */   "CategoryPanelSystem": () => (/* binding */ CategoryPanelSystem)
 /* harmony export */ });
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
-/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__]);
-([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_2__, _UISystem__WEBPACK_IMPORTED_MODULE_3__]);
+([elixr__WEBPACK_IMPORTED_MODULE_2__, _UISystem__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
 
 
 
-class CategoryComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
+class CategoryComponent extends elixr__WEBPACK_IMPORTED_MODULE_2__.GameComponent {}
 
 CategoryComponent.schema = {
-	key: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.String, default: '' },
+	key: { type: elixr__WEBPACK_IMPORTED_MODULE_2__.Types.String, default: '' },
 };
 
-class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
+class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_2__.XRGameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent);
 		this.category = this.queryGameObjects('category')[0].getMutableComponent(
 			CategoryComponent,
 		);
-		const categoryPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+		const categoryPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block({
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
-			width: 0.6,
+			width: 0.4,
 			height: 0.41,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
+			justifyContent: 'center',
 		});
 		categoryPanel.rotateY(Math.PI / 8);
-		this.ui.container.add(categoryPanel);
-		categoryPanel.position.set(-0.8, -0.1, -1.01);
+		this.ui.expandedUIContainer.add(categoryPanel);
+		categoryPanel.position.set(-0.695, -0.1, -1.04);
 
 		const buttonOptions = {
 			width: 0.17,
-			height: 0.08,
+			height: 0.055,
 			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
+			offset: 0.001,
+			margin: 0.005,
 			padding: 0,
-			borderRadius: 0.04,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+			borderRadius: 0.02,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 		};
 
 		this.buttons = [];
 
-		Object.keys(_constants__WEBPACK_IMPORTED_MODULE_2__.PROMPT_CATEGORIES).forEach((category) => {
-			const button = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(buttonOptions);
-			button.add(new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: category, fontSize: 0.04 }));
+		Object.keys(_constants__WEBPACK_IMPORTED_MODULE_1__.PROMPT_CATEGORIES).forEach((category) => {
+			const button = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(buttonOptions);
+			button.add(
+				new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: category, fontSize: 0.04, offset: 0.001 }),
+			);
 
 			button.setupState({
 				state: 'idle',
 				attributes: {
 					offset: 0.01,
-					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 					backgroundOpacity: 1,
 				},
 			});
@@ -20592,7 +20795,7 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 				state: 'hovered',
 				attributes: {
 					offset: 0.01,
-					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.hovered),
 					backgroundOpacity: 1,
 				},
 			});
@@ -20601,7 +20804,7 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 				state: 'selected',
 				attributes: {
 					offset: 0.005,
-					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+					backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.selected),
 					backgroundOpacity: 1,
 				},
 				onSet: () => {
@@ -20611,39 +20814,22 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 			this.buttons.push(button);
 		});
 
+		const rowConfig = {
+			height: 0.065,
+			width: 1,
+			offset: 0,
+			contentDirection: 'row',
+			justifyContent: 'center',
+			backgroundOpacity: 0,
+		};
+
 		categoryPanel.add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[0], this.buttons[1], this.buttons[2]),
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[3], this.buttons[4], this.buttons[5]),
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[6], this.buttons[7], this.buttons[8]),
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[9], this.buttons[10]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[0], this.buttons[1]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[2], this.buttons[3]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[4], this.buttons[5]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[6], this.buttons[7]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[8], this.buttons[9]),
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(rowConfig).add(this.buttons[10], this.buttons[11]),
 		);
 
 		this.selectedButton = this.buttons[0];
@@ -20651,9 +20837,6 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 	}
 
 	update() {
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
 		const intersect = this.buttons.reduce((closestIntersection, obj) => {
 			const intersection = this.ui.raycaster.intersectObject(obj, true);
 			if (!intersection[0]) return closestIntersection;
@@ -20667,23 +20850,19 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 			return closestIntersection;
 		}, null);
 
-		const selectState = rightController.gamepad.getButtonUp(
-			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
 		if (intersect && intersect.object.isUI) {
 			this.ui.raycaster.rayLength = Math.min(
 				this.ui.raycaster.rayLength,
 				intersect.distance,
 			);
 			if (intersect.object !== this.selectedButton) {
-				if (selectState && intersect.object.currentState === 'hovered') {
+				if (this.ui.selecting && intersect.object.currentState === 'hovered') {
 					if (intersect.object.states['selected']) {
 						intersect.object.setState('selected');
 						this.selectedButton?.setState('idle');
 						this.selectedButton = intersect.object;
 					}
-				} else if (!selectState) {
+				} else if (!this.ui.selecting) {
 					if (intersect.object.states['hovered'])
 						intersect.object.setState('hovered');
 				}
@@ -20705,340 +20884,6 @@ class CategoryPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSyste
 CategoryPanelSystem.queries = {
 	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_3__.UIComponent] },
 	category: { components: [CategoryComponent] },
-};
-
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
-
-/***/ }),
-
-/***/ "./src/GenerateButtonSystem.js":
-/*!*************************************!*\
-  !*** ./src/GenerateButtonSystem.js ***!
-  \*************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "GenerateButtonSystem": () => (/* binding */ GenerateButtonSystem)
-/* harmony export */ });
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
-/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
-/* harmony import */ var _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./CategoryPanelSystem */ "./src/CategoryPanelSystem.js");
-/* harmony import */ var _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./KeyboardSystem */ "./src/KeyboardSystem.js");
-/* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
-/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__]);
-([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-
-
-
-
-
-
-
-
-
-const myHeaders = new Headers();
-myHeaders.append('Accept', 'application/json, text/plain, */*');
-myHeaders.append('Accept-Language', 'en-US,en;q=0.5');
-myHeaders.append('Connection', 'keep-alive');
-myHeaders.append('Content-Type', 'application/json');
-myHeaders.append('Origin', 'https://skybox.blockadelabs.com');
-myHeaders.append('Referer', 'https://skybox.blockadelabs.com/');
-myHeaders.append('Sec-Fetch-Dest', 'empty');
-myHeaders.append('Sec-Fetch-Mode', 'cors');
-myHeaders.append('Sec-Fetch-Site', 'same-site');
-myHeaders.append('Sec-GPC', '1');
-myHeaders.append(
-	'User-Agent',
-	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-);
-myHeaders.append(
-	'sec-ch-ua',
-	'"Chromium";v="110", "Not A(Brand";v="24", "Brave";v="110"',
-);
-myHeaders.append('sec-ch-ua-mobile', '?0');
-myHeaders.append('sec-ch-ua-platform', '"macOS"');
-
-class GenerateButtonSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
-	init() {
-		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_6__.UIComponent);
-		this.input = this.queryGameObjects('input')[0].getComponent(
-			_KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__.KeyboardInputComponent,
-		);
-		this.category = this.queryGameObjects('category')[0].getComponent(
-			_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__.CategoryComponent,
-		);
-		this.skybox = this.queryGameObjects('skybox')[0].getMutableComponent(
-			_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__.SkyboxComponent,
-		);
-		const rightPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			fontFamily: 'assets/Roboto-msdf.json',
-			fontTexture: 'assets/Roboto-msdf.png',
-			width: 0.6,
-			height: 0.41,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
-			backgroundOpacity: 0.8,
-			borderRadius: 0.03,
-		});
-		rightPanel.rotateY(-Math.PI / 8);
-		rightPanel.position.set(0.8, -0.1, -1.01);
-
-		const instruction = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			width: 1,
-			height: 0.1,
-			justifyContent: 'center',
-			fontSize: 0.03,
-			backgroundOpacity: 0,
-			margin: 0.02,
-		}).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({
-				content: 'Ray to point, Trigger to select\nGrip to toggle UI',
-			}),
-		);
-
-		const historyButtons = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			width: 0.6,
-			height: 0.12,
-			backgroundOpacity: 0,
-			contentDirection: 'row',
-			justifyContent: 'center',
-		});
-
-		const historyButtonConfig = {
-			width: 0.26,
-			height: 0.11,
-			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
-			padding: 0,
-			borderRadius: 0.03,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
-		};
-
-		const backButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(historyButtonConfig).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Back', fontSize: 0.04 }),
-		);
-
-		backButton.setupState({
-			state: 'idle',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
-				backgroundOpacity: 1,
-			},
-		});
-
-		backButton.setupState({
-			state: 'hovered',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
-				backgroundOpacity: 1,
-			},
-		});
-
-		backButton.setupState({
-			state: 'selected',
-			attributes: {
-				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
-				backgroundOpacity: 1,
-			},
-			onSet: () => {
-				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
-				if (currentId == -1) {
-					if (this.skybox.history.length > 0) {
-						this.skybox.requestedId = this.skybox.history[
-							this.skybox.history.length - 1
-						];
-					}
-				} else if (currentId > 0) {
-					this.skybox.requestedId = this.skybox.history[currentId - 1];
-				}
-			},
-		});
-
-		const forwardButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(historyButtonConfig).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Forward', fontSize: 0.04 }),
-		);
-
-		forwardButton.setupState({
-			state: 'idle',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
-				backgroundOpacity: 1,
-			},
-		});
-
-		forwardButton.setupState({
-			state: 'hovered',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
-				backgroundOpacity: 1,
-			},
-		});
-
-		forwardButton.setupState({
-			state: 'selected',
-			attributes: {
-				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
-				backgroundOpacity: 1,
-			},
-			onSet: () => {
-				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
-				if (currentId == -1 || currentId == this.skybox.history.length - 1)
-					return;
-				this.skybox.requestedId = this.skybox.history[currentId + 1];
-			},
-		});
-
-		historyButtons.add(backButton, forwardButton);
-
-		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
-			width: 0.55,
-			height: 0.11,
-			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
-			padding: 0,
-			borderRadius: 0.03,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
-		});
-
-		this.buttonText = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Generate', fontSize: 0.04 });
-
-		this.generateButton.add(this.buttonText);
-		this.generateButton.setupState({
-			state: 'idle',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
-				backgroundOpacity: 1,
-			},
-		});
-
-		this.generateButton.setupState({
-			state: 'hovered',
-			attributes: {
-				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
-				backgroundOpacity: 1,
-			},
-		});
-
-		this.generateButton.setupState({
-			state: 'selected',
-			attributes: {
-				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
-				backgroundOpacity: 1,
-			},
-			onSet: () => {
-				const generating = this.skybox.currentId !== this.skybox.requestedId;
-				if (generating) return;
-				const raw = JSON.stringify({
-					prompt: this.input.text.length > 0 ? this.input.text : 'nothing',
-					styleId: _constants__WEBPACK_IMPORTED_MODULE_2__.PROMPT_CATEGORIES[this.category.key].styleId,
-				});
-
-				this.requestOptions.body = raw;
-
-				fetch('https://api.countapi.xyz/hit/felixtrz-skybx/gen', {
-					method: 'GET',
-				});
-
-				fetch(
-					'https://assetforger.blockadelabs.com/api/skybox/generateSkyboxImage',
-					this.requestOptions,
-				)
-					.then((response) => response.text())
-					.then((result) => {
-						const skyboxId = JSON.parse(result).id;
-						this.skybox.requestedId = skyboxId;
-						console.log('skybox generation requested', skyboxId);
-					})
-					.catch((error) => console.log('error', error));
-			},
-		});
-
-		rightPanel.add(instruction, historyButtons, this.generateButton);
-
-		this.buttons = [backButton, forwardButton, this.generateButton];
-		this.ui.container.add(rightPanel);
-
-		this.requestOptions = {
-			method: 'POST',
-			headers: myHeaders,
-			body: null,
-			redirect: 'follow',
-		};
-
-		this.wasGenerating = false;
-	}
-
-	update() {
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
-		const generating = this.skybox.currentId !== this.skybox.requestedId;
-		if (generating && !this.wasGenerating) {
-			this.buttonText.set({ content: 'Generating...' });
-		} else if (!generating && this.wasGenerating) {
-			this.buttonText.set({ content: 'Generate' });
-		}
-		this.wasGenerating = generating;
-
-		const intersect = this.buttons.reduce((closestIntersection, obj) => {
-			const intersection = this.ui.raycaster.intersectObject(obj, true);
-			if (!intersection[0]) return closestIntersection;
-			if (
-				!closestIntersection ||
-				intersection[0].distance < closestIntersection.distance
-			) {
-				intersection[0].object = obj;
-				return intersection[0];
-			}
-			return closestIntersection;
-		}, null);
-
-		const selectState = rightController.gamepad.getButtonUp(
-			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
-		if (intersect && intersect.object.isUI) {
-			this.ui.raycaster.rayLength = Math.min(
-				this.ui.raycaster.rayLength,
-				intersect.distance,
-			);
-			if (selectState && intersect.object.currentState === 'hovered') {
-				if (intersect.object.states['selected'])
-					intersect.object.setState('selected');
-			} else if (!selectState) {
-				if (intersect.object.states['hovered'])
-					intersect.object.setState('hovered');
-			}
-		}
-
-		this.buttons.forEach((obj) => {
-			if ((!intersect || obj !== intersect.object) && obj.isUI) {
-				if (obj.states['idle']) obj.setState('idle');
-			}
-		});
-	}
-}
-
-GenerateButtonSystem.queries = {
-	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_6__.UIComponent] },
-	input: { components: [_KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__.KeyboardInputComponent] },
-	category: { components: [_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__.CategoryComponent] },
-	skybox: { components: [_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__.SkyboxComponent] },
 };
 
 __webpack_async_result__();
@@ -21092,7 +20937,7 @@ class KeyboardSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 			enterTexture: 'assets/enter.png',
 		});
 		this.keyboard.rotateX(-Math.PI / 6);
-		this.ui.container.add(this.keyboard);
+		this.ui.expandedUIContainer.add(this.keyboard);
 		this.keyboard.position.set(0, -0.5, -1);
 		this.keys = [];
 		this.text = '';
@@ -21246,12 +21091,12 @@ class PromptPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem 
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
 			width: 1,
-			height: 0.25,
+			height: 0.28,
 			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_1__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 		});
-		textPanel.position.set(0, -0.18, -1.12);
+		textPanel.position.set(0, -0.165, -1.12);
 
 		const title = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block({
 			width: 1,
@@ -21272,7 +21117,7 @@ class PromptPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem 
 		}).add(this.userText);
 
 		textPanel.add(title, textField);
-		this.ui.container.add(textPanel);
+		this.ui.expandedUIContainer.add(textPanel);
 	}
 
 	update() {
@@ -21329,6 +21174,10 @@ class SkyboxComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {
 
 SkyboxComponent.schema = {
 	currentId: {
+		type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.String,
+		default: null,
+	},
+	currentImageUrl: {
 		type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.String,
 		default: null,
 	},
@@ -21398,6 +21247,7 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 							skyboxComponent.history.push(skyboxComponent.requestedId);
 						}
 						skyboxComponent.currentId = skyboxComponent.requestedId;
+						skyboxComponent.currentImageUrl = skyboxUrl;
 						const loader = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.TextureLoader();
 						loader.load(
 							skyboxUrl,
@@ -21553,15 +21403,19 @@ class UIComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
 
 UIComponent.schema = {
 	container: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
+	expandedUIContainer: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
 	raycaster: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
 	targetRay: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
 	marker: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: null },
+	selecting: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Boolean, default: false },
 };
 
 class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(UIComponent);
 		this.ui.container = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Group();
+		this.ui.expandedUIContainer = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Group();
+		this.ui.container.add(this.ui.expandedUIContainer);
 		this.ui.container.position.set(0, 1.7, 0);
 		this.ui.raycaster = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Raycaster();
 		this.ui.raycaster.far = 2;
@@ -21606,13 +21460,9 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		);
 		this.ui.raycaster.rayLength = 2;
 
-		if (rightController.gamepad.getButtonDown(elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.SQUEEZE)) {
-			if (this.ui.container.position.x > 100) {
-				this.ui.container.position.x = 0;
-			} else {
-				this.ui.container.position.x = 1000;
-			}
-		}
+		this.ui.selecting = rightController.gamepad.getButtonUp(
+			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
+		);
 
 		if (
 			!this.isFollowing &&
@@ -21651,6 +21501,391 @@ UISystem.queries = {
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/WorldPanelSystem.js":
+/*!*********************************!*\
+  !*** ./src/WorldPanelSystem.js ***!
+  \*********************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "WorldPanelSystem": () => (/* binding */ WorldPanelSystem)
+/* harmony export */ });
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
+/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./CategoryPanelSystem */ "./src/CategoryPanelSystem.js");
+/* harmony import */ var _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./KeyboardSystem */ "./src/KeyboardSystem.js");
+/* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
+/* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__]);
+([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
+
+
+
+
+
+
+
+
+const myHeaders = new Headers();
+myHeaders.append('Accept', 'application/json, text/plain, */*');
+myHeaders.append('Accept-Language', 'en-US,en;q=0.5');
+myHeaders.append('Connection', 'keep-alive');
+myHeaders.append('Content-Type', 'application/json');
+myHeaders.append('Origin', 'https://skybox.blockadelabs.com');
+myHeaders.append('Referer', 'https://skybox.blockadelabs.com/');
+myHeaders.append('Sec-Fetch-Dest', 'empty');
+myHeaders.append('Sec-Fetch-Mode', 'cors');
+myHeaders.append('Sec-Fetch-Site', 'same-site');
+myHeaders.append('Sec-GPC', '1');
+myHeaders.append(
+	'User-Agent',
+	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+);
+myHeaders.append(
+	'sec-ch-ua',
+	'"Chromium";v="110", "Not A(Brand";v="24", "Brave";v="110"',
+);
+myHeaders.append('sec-ch-ua-mobile', '?0');
+myHeaders.append('sec-ch-ua-platform', '"macOS"');
+
+class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
+	init() {
+		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_6__.UIComponent);
+		this.input = this.queryGameObjects('input')[0].getComponent(
+			_KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__.KeyboardInputComponent,
+		);
+		this.category = this.queryGameObjects('category')[0].getComponent(
+			_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__.CategoryComponent,
+		);
+		this.skybox = this.queryGameObjects('skybox')[0].getMutableComponent(
+			_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__.SkyboxComponent,
+		);
+		const worldPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+			fontFamily: 'assets/Roboto-msdf.json',
+			fontTexture: 'assets/Roboto-msdf.png',
+			width: 0.4,
+			height: 0.41,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
+			backgroundOpacity: 0.8,
+			borderRadius: 0.03,
+			justifyContent: 'center',
+		});
+		worldPanel.rotateY(-Math.PI / 8);
+		worldPanel.position.set(0.695, -0.1, -1.04);
+
+		const worldButtonConfig = {
+			width: 0.36,
+			height: 0.09,
+			justifyContent: 'center',
+			offset: 0.001,
+			margin: 0.005,
+			padding: 0,
+			borderRadius: 0.03,
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+		};
+
+		const saveButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Save Skybox', fontSize: 0.04 }),
+		);
+
+		saveButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		saveButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		saveButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				window.open(this.skybox.currentImageUrl, '_blank');
+			},
+		});
+
+		const backButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Previous World', fontSize: 0.04 }),
+		);
+
+		backButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		backButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		backButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
+				if (currentId == -1) {
+					if (this.skybox.history.length > 0) {
+						this.skybox.requestedId = this.skybox.history[
+							this.skybox.history.length - 1
+						];
+					}
+				} else if (currentId > 0) {
+					this.skybox.requestedId = this.skybox.history[currentId - 1];
+				}
+			},
+		});
+
+		const forwardButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Next World', fontSize: 0.04 }),
+		);
+
+		forwardButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		forwardButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		forwardButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				const currentId = this.skybox.history.indexOf(this.skybox.currentId);
+				if (currentId == -1 || currentId == this.skybox.history.length - 1)
+					return;
+				this.skybox.requestedId = this.skybox.history[currentId + 1];
+			},
+		});
+
+		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig);
+
+		this.buttonText = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Generate', fontSize: 0.04 });
+
+		this.generateButton.add(this.buttonText);
+		this.generateButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		this.generateButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		this.generateButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				const generating = this.skybox.currentId !== this.skybox.requestedId;
+				if (generating) return;
+				const raw = JSON.stringify({
+					prompt: this.input.text.length > 0 ? this.input.text : 'nothing',
+					styleId: _constants__WEBPACK_IMPORTED_MODULE_2__.PROMPT_CATEGORIES[this.category.key].styleId,
+				});
+
+				this.requestOptions.body = raw;
+
+				fetch('https://api.countapi.xyz/hit/felixtrz-skybx/gen', {
+					method: 'GET',
+				});
+
+				fetch(
+					'https://assetforger.blockadelabs.com/api/skybox/generateSkyboxImage',
+					this.requestOptions,
+				)
+					.then((response) => response.text())
+					.then((result) => {
+						const skyboxId = JSON.parse(result).id;
+						this.skybox.requestedId = skyboxId;
+						console.log('skybox generation requested', skyboxId);
+					})
+					.catch((error) => console.log('error', error));
+			},
+		});
+
+		worldPanel.add(saveButton, backButton, forwardButton, this.generateButton);
+
+		this.buttons = [saveButton, backButton, forwardButton, this.generateButton];
+		this.ui.expandedUIContainer.add(worldPanel);
+
+		this.requestOptions = {
+			method: 'POST',
+			headers: myHeaders,
+			body: null,
+			redirect: 'follow',
+		};
+
+		this.wasGenerating = false;
+	}
+
+	update() {
+		const rightController = this.core.controllers['right'];
+		if (!rightController) return;
+
+		const generating = this.skybox.currentId !== this.skybox.requestedId;
+		if (generating && !this.wasGenerating) {
+			this.buttonText.set({ content: 'Generating...' });
+		} else if (!generating && this.wasGenerating) {
+			this.buttonText.set({ content: 'Generate' });
+		}
+		this.wasGenerating = generating;
+
+		const intersect = this.buttons.reduce((closestIntersection, obj) => {
+			const intersection = this.ui.raycaster.intersectObject(obj, true);
+			if (!intersection[0]) return closestIntersection;
+			if (
+				!closestIntersection ||
+				intersection[0].distance < closestIntersection.distance
+			) {
+				intersection[0].object = obj;
+				return intersection[0];
+			}
+			return closestIntersection;
+		}, null);
+
+		const selectState = rightController.gamepad.getButtonUp(
+			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
+		);
+
+		if (intersect && intersect.object.isUI) {
+			this.ui.raycaster.rayLength = Math.min(
+				this.ui.raycaster.rayLength,
+				intersect.distance,
+			);
+			if (selectState && intersect.object.currentState === 'hovered') {
+				if (intersect.object.states['selected'])
+					intersect.object.setState('selected');
+			} else if (!selectState) {
+				if (intersect.object.states['hovered'])
+					intersect.object.setState('hovered');
+			}
+		}
+
+		this.buttons.forEach((obj) => {
+			if ((!intersect || obj !== intersect.object) && obj.isUI) {
+				if (obj.states['idle']) obj.setState('idle');
+			}
+		});
+	}
+}
+
+WorldPanelSystem.queries = {
+	ui: { components: [_UISystem__WEBPACK_IMPORTED_MODULE_6__.UIComponent] },
+	input: { components: [_KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__.KeyboardInputComponent] },
+	category: { components: [_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__.CategoryComponent] },
+	skybox: { components: [_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__.SkyboxComponent] },
+};
+
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/buttonUtil.js":
+/*!***************************!*\
+  !*** ./src/buttonUtil.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "updateButtons": () => (/* binding */ updateButtons)
+/* harmony export */ });
+const updateButtons = (buttons, uiComponent) => {
+	const intersect = buttons.reduce((closestIntersection, obj) => {
+		const intersection = uiComponent.raycaster.intersectObject(obj, true);
+		if (!intersection[0]) return closestIntersection;
+		if (
+			!closestIntersection ||
+			intersection[0].distance < closestIntersection.distance
+		) {
+			intersection[0].object = obj;
+			return intersection[0];
+		}
+		return closestIntersection;
+	}, null);
+
+	if (intersect && intersect.object.isUI) {
+		uiComponent.raycaster.rayLength = Math.min(
+			uiComponent.raycaster.rayLength,
+			intersect.distance,
+		);
+		if (uiComponent.selecting && intersect.object.currentState === 'hovered') {
+			if (intersect.object.states['selected'])
+				intersect.object.setState('selected');
+		} else if (!uiComponent.selecting) {
+			if (intersect.object.states['hovered'])
+				intersect.object.setState('hovered');
+		}
+	}
+
+	buttons.forEach((obj) => {
+		if ((!intersect || obj !== intersect.object) && obj.isUI) {
+			if (obj.states['idle']) obj.setState('idle');
+		}
+	});
+};
+
 
 /***/ }),
 
@@ -21730,12 +21965,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
 /* harmony import */ var _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./BannerPanelSystem */ "./src/BannerPanelSystem.js");
-/* harmony import */ var _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./GenerateButtonSystem */ "./src/GenerateButtonSystem.js");
-/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
-/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
+/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
+/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
+/* harmony import */ var _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./WorldPanelSystem */ "./src/WorldPanelSystem.js");
 /* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__]);
-([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__]);
+([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -21765,10 +22000,11 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	game.addComponent(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardInputComponent);
 	core.registerGameSystem(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardSystem);
 	core.registerGameSystem(_BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__.BannerPanelSystem);
-	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__.PromptPanelSystem);
+	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__.PromptPanelSystem);
 	core.registerGameSystem(_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__.CategoryPanelSystem);
-	core.registerGameSystem(_GenerateButtonSystem__WEBPACK_IMPORTED_MODULE_7__.GenerateButtonSystem);
-	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__.UIRenderSystem);
+	core.registerGameSystem(_WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__.WorldPanelSystem);
+	core.registerGameSystem(elixr__WEBPACK_IMPORTED_MODULE_2__.XRSnapTurnSystem);
+	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__.UIRenderSystem);
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');

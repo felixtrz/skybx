@@ -1,6 +1,6 @@
-import { BUTTONS, GameComponent, THREE, Types, XRGameSystem } from 'elixr';
 import { Block, Text } from 'three-mesh-ui';
 import { COLORS, PROMPT_CATEGORIES } from './constants';
+import { GameComponent, THREE, Types, XRGameSystem } from 'elixr';
 
 import { UIComponent } from './UISystem';
 
@@ -19,24 +19,25 @@ export class CategoryPanelSystem extends XRGameSystem {
 		const categoryPanel = new Block({
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
-			width: 0.6,
+			width: 0.4,
 			height: 0.41,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
+			justifyContent: 'center',
 		});
 		categoryPanel.rotateY(Math.PI / 8);
-		this.ui.container.add(categoryPanel);
-		categoryPanel.position.set(-0.8, -0.1, -1.01);
+		this.ui.expandedUIContainer.add(categoryPanel);
+		categoryPanel.position.set(-0.695, -0.1, -1.04);
 
 		const buttonOptions = {
 			width: 0.17,
-			height: 0.08,
+			height: 0.055,
 			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
+			offset: 0.001,
+			margin: 0.005,
 			padding: 0,
-			borderRadius: 0.04,
+			borderRadius: 0.02,
 			backgroundColor: new THREE.Color(COLORS.button),
 		};
 
@@ -44,7 +45,9 @@ export class CategoryPanelSystem extends XRGameSystem {
 
 		Object.keys(PROMPT_CATEGORIES).forEach((category) => {
 			const button = new Block(buttonOptions);
-			button.add(new Text({ content: category, fontSize: 0.04 }));
+			button.add(
+				new Text({ content: category, fontSize: 0.04, offset: 0.001 }),
+			);
 
 			button.setupState({
 				state: 'idle',
@@ -78,39 +81,22 @@ export class CategoryPanelSystem extends XRGameSystem {
 			this.buttons.push(button);
 		});
 
+		const rowConfig = {
+			height: 0.065,
+			width: 1,
+			offset: 0,
+			contentDirection: 'row',
+			justifyContent: 'center',
+			backgroundOpacity: 0,
+		};
+
 		categoryPanel.add(
-			new Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[0], this.buttons[1], this.buttons[2]),
-			new Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[3], this.buttons[4], this.buttons[5]),
-			new Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[6], this.buttons[7], this.buttons[8]),
-			new Block({
-				height: 0.1,
-				width: 1,
-				offset: 0,
-				contentDirection: 'row',
-				justifyContent: 'center',
-				backgroundOpacity: 0,
-			}).add(this.buttons[9], this.buttons[10]),
+			new Block(rowConfig).add(this.buttons[0], this.buttons[1]),
+			new Block(rowConfig).add(this.buttons[2], this.buttons[3]),
+			new Block(rowConfig).add(this.buttons[4], this.buttons[5]),
+			new Block(rowConfig).add(this.buttons[6], this.buttons[7]),
+			new Block(rowConfig).add(this.buttons[8], this.buttons[9]),
+			new Block(rowConfig).add(this.buttons[10], this.buttons[11]),
 		);
 
 		this.selectedButton = this.buttons[0];
@@ -118,9 +104,6 @@ export class CategoryPanelSystem extends XRGameSystem {
 	}
 
 	update() {
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
 		const intersect = this.buttons.reduce((closestIntersection, obj) => {
 			const intersection = this.ui.raycaster.intersectObject(obj, true);
 			if (!intersection[0]) return closestIntersection;
@@ -134,23 +117,19 @@ export class CategoryPanelSystem extends XRGameSystem {
 			return closestIntersection;
 		}, null);
 
-		const selectState = rightController.gamepad.getButtonUp(
-			BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
 		if (intersect && intersect.object.isUI) {
 			this.ui.raycaster.rayLength = Math.min(
 				this.ui.raycaster.rayLength,
 				intersect.distance,
 			);
 			if (intersect.object !== this.selectedButton) {
-				if (selectState && intersect.object.currentState === 'hovered') {
+				if (this.ui.selecting && intersect.object.currentState === 'hovered') {
 					if (intersect.object.states['selected']) {
 						intersect.object.setState('selected');
 						this.selectedButton?.setState('idle');
 						this.selectedButton = intersect.object;
 					}
-				} else if (!selectState) {
+				} else if (!this.ui.selecting) {
 					if (intersect.object.states['hovered'])
 						intersect.object.setState('hovered');
 				}
