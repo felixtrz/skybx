@@ -1,15 +1,15 @@
 import './styles/index.css';
 
 import { CategoryComponent, CategoryPanelSystem } from './CategoryPanelSystem';
-import { Core, GameObject, VRButton } from 'elixr';
+import { Core, GameObject, VRButton, XRSnapTurnSystem } from 'elixr';
 import { KeyboardInputComponent, KeyboardSystem } from './KeyboardSystem';
 import { SkyboxComponent, SkyboxLoadingSystem } from './SkyboxLoadingSystem';
 import { UIComponent, UISystem } from './UISystem';
 
 import { BannerPanelSystem } from './BannerPanelSystem';
-import { GenerateButtonSystem } from './GenerateButtonSystem';
 import { PromptPanelSystem } from './PromptPanelSystem';
 import { UIRenderSystem } from './UIRenderSystem';
+import { WorldPanelSystem } from './WorldPanelSystem';
 import { landingPageLogic } from './landing';
 
 Core.init(document.getElementById('scene-container')).then((core) => {
@@ -29,7 +29,8 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.registerGameSystem(BannerPanelSystem);
 	core.registerGameSystem(PromptPanelSystem);
 	core.registerGameSystem(CategoryPanelSystem);
-	core.registerGameSystem(GenerateButtonSystem);
+	core.registerGameSystem(WorldPanelSystem);
+	core.registerGameSystem(XRSnapTurnSystem);
 	core.registerGameSystem(UIRenderSystem);
 
 	const vrButton = document.getElementById('vr-button');

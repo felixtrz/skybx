@@ -29,7 +29,7 @@ myHeaders.append(
 myHeaders.append('sec-ch-ua-mobile', '?0');
 myHeaders.append('sec-ch-ua-platform', '"macOS"');
 
-export class GenerateButtonSystem extends GameSystem {
+export class WorldPanelSystem extends GameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(UIComponent);
 		this.input = this.queryGameObjects('input')[0].getComponent(
@@ -41,52 +41,66 @@ export class GenerateButtonSystem extends GameSystem {
 		this.skybox = this.queryGameObjects('skybox')[0].getMutableComponent(
 			SkyboxComponent,
 		);
-		const rightPanel = new Block({
+		const worldPanel = new Block({
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
-			width: 0.6,
+			width: 0.4,
 			height: 0.41,
 			backgroundColor: new THREE.Color(COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
-		});
-		rightPanel.rotateY(-Math.PI / 8);
-		rightPanel.position.set(0.8, -0.1, -1.01);
-
-		const instruction = new Block({
-			width: 1,
-			height: 0.1,
-			justifyContent: 'center',
-			fontSize: 0.03,
-			backgroundOpacity: 0,
-			margin: 0.02,
-		}).add(
-			new Text({
-				content: 'Ray to point, Trigger to select\nGrip to toggle UI',
-			}),
-		);
-
-		const historyButtons = new Block({
-			width: 0.6,
-			height: 0.12,
-			backgroundOpacity: 0,
-			contentDirection: 'row',
 			justifyContent: 'center',
 		});
+		worldPanel.rotateY(-Math.PI / 8);
+		worldPanel.position.set(0.695, -0.1, -1.04);
 
-		const historyButtonConfig = {
-			width: 0.26,
-			height: 0.11,
+		const worldButtonConfig = {
+			width: 0.36,
+			height: 0.09,
 			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
+			offset: 0.001,
+			margin: 0.005,
 			padding: 0,
 			borderRadius: 0.03,
 			backgroundColor: new THREE.Color(COLORS.button),
 		};
 
-		const backButton = new Block(historyButtonConfig).add(
-			new Text({ content: 'Back', fontSize: 0.04 }),
+		const saveButton = new Block(worldButtonConfig).add(
+			new Text({ content: 'Save Skybox', fontSize: 0.04 }),
+		);
+
+		saveButton.setupState({
+			state: 'idle',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new THREE.Color(COLORS.button),
+				backgroundOpacity: 1,
+			},
+		});
+
+		saveButton.setupState({
+			state: 'hovered',
+			attributes: {
+				offset: 0.01,
+				backgroundColor: new THREE.Color(COLORS.hovered),
+				backgroundOpacity: 1,
+			},
+		});
+
+		saveButton.setupState({
+			state: 'selected',
+			attributes: {
+				offset: 0.005,
+				backgroundColor: new THREE.Color(COLORS.selected),
+				backgroundOpacity: 1,
+			},
+			onSet: () => {
+				window.open(this.skybox.currentImageUrl, '_blank');
+			},
+		});
+
+		const backButton = new Block(worldButtonConfig).add(
+			new Text({ content: 'Previous World', fontSize: 0.04 }),
 		);
 
 		backButton.setupState({
@@ -128,8 +142,8 @@ export class GenerateButtonSystem extends GameSystem {
 			},
 		});
 
-		const forwardButton = new Block(historyButtonConfig).add(
-			new Text({ content: 'Forward', fontSize: 0.04 }),
+		const forwardButton = new Block(worldButtonConfig).add(
+			new Text({ content: 'Next World', fontSize: 0.04 }),
 		);
 
 		forwardButton.setupState({
@@ -165,18 +179,7 @@ export class GenerateButtonSystem extends GameSystem {
 			},
 		});
 
-		historyButtons.add(backButton, forwardButton);
-
-		this.generateButton = new Block({
-			width: 0.55,
-			height: 0.11,
-			justifyContent: 'center',
-			offset: 0.01,
-			margin: 0.01,
-			padding: 0,
-			borderRadius: 0.03,
-			backgroundColor: new THREE.Color(COLORS.button),
-		});
+		this.generateButton = new Block(worldButtonConfig);
 
 		this.buttonText = new Text({ content: 'Generate', fontSize: 0.04 });
 
@@ -234,10 +237,10 @@ export class GenerateButtonSystem extends GameSystem {
 			},
 		});
 
-		rightPanel.add(instruction, historyButtons, this.generateButton);
+		worldPanel.add(saveButton, backButton, forwardButton, this.generateButton);
 
-		this.buttons = [backButton, forwardButton, this.generateButton];
-		this.ui.expandedUIContainer.add(rightPanel);
+		this.buttons = [saveButton, backButton, forwardButton, this.generateButton];
+		this.ui.expandedUIContainer.add(worldPanel);
 
 		this.requestOptions = {
 			method: 'POST',
@@ -300,7 +303,7 @@ export class GenerateButtonSystem extends GameSystem {
 	}
 }
 
-GenerateButtonSystem.queries = {
+WorldPanelSystem.queries = {
 	ui: { components: [UIComponent] },
 	input: { components: [KeyboardInputComponent] },
 	category: { components: [CategoryComponent] },
