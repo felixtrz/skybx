@@ -1,7 +1,7 @@
 import './styles/index.css';
 
 import { CategoryComponent, CategoryPanelSystem } from './CategoryPanelSystem';
-import { Core, GameObject, VRButton, XRSnapTurnSystem } from 'elixr';
+import { Core, GameObject, THREE, VRButton, XRSnapTurnSystem } from 'elixr';
 import { KeyboardInputComponent, KeyboardSystem } from './KeyboardSystem';
 import { SkyboxComponent, SkyboxLoadingSystem } from './SkyboxLoadingSystem';
 import { UIComponent, UISystem } from './UISystem';
@@ -32,6 +32,10 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.registerGameSystem(WorldPanelSystem);
 	core.registerGameSystem(XRSnapTurnSystem);
 	core.registerGameSystem(UIRenderSystem);
+
+	core.inlineCamera.fov = 80;
+	core.inlineCamera.updateProjectionMatrix();
+	core.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');

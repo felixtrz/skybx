@@ -8,6 +8,7 @@ const ANIMATION_STATES = {
 	Vanishing: 'vanishing',
 	Appearing: 'appearing',
 };
+const CAMERA_ANGULAR_SPEED = Math.PI / 36;
 
 const myHeaders = new Headers();
 myHeaders.append('Accept', 'application/json, text/plain, */*');
@@ -63,11 +64,25 @@ export class SkyboxLoadingSystem extends GameSystem {
 		this.animationTimer = 0;
 	}
 
+	initXR() {
+		this.sphere?.scale.setScalar(1);
+	}
+
+	exitXR() {
+		this.core.inlineCamera.position.set(0, 1.7, 0);
+		this.core.inlineCamera.quaternion.set(0, 0, 0, 1);
+		this.sphere?.scale.setScalar(0.01);
+	}
+
 	update(delta, _time) {
 		this.fetchTimeout -= delta;
 		const skyboxComponent = this.queryGameObjects(
 			'game',
 		)[0].getMutableComponent(SkyboxComponent);
+
+		if (!this.core.isImmersive()) {
+			this.core.inlineCamera.rotateY(CAMERA_ANGULAR_SPEED * delta);
+		}
 
 		if (
 			!this.fetchInProgress &&
@@ -86,6 +101,7 @@ export class SkyboxLoadingSystem extends GameSystem {
 					this.fetchInProgress = false;
 					this.fetchTimeout = 2;
 					const skyboxUrl = JSON.parse(result).file_url;
+					const thumbUrl = JSON.parse(result).thumb_url;
 					if (skyboxUrl) {
 						if (
 							!skyboxComponent.history.includes(skyboxComponent.requestedId)
@@ -108,11 +124,9 @@ export class SkyboxLoadingSystem extends GameSystem {
 						);
 
 						loader.load(
-							skyboxUrl,
+							thumbUrl,
 							(texture) => {
-								texture.mapping = THREE.EquirectangularReflectionMapping;
-								this.core.scene.background = texture;
-								this.core.scene.environment = texture;
+								this.newEnvTexture = texture;
 							},
 							undefined,
 							function () {
@@ -148,6 +162,12 @@ export class SkyboxLoadingSystem extends GameSystem {
 				this.sphere = new THREE.Mesh(SKYBOX_GEOMETRY, material);
 				this.sphere.frustumCulled = false;
 				this.core.scene.add(this.sphere);
+				this.newEnvTexture.mapping = THREE.EquirectangularReflectionMapping;
+				this.core.scene.environment = this.newEnvTexture;
+
+				if (!this.core.isImmersive()) {
+					this.sphere.scale.setScalar(0.01);
+				}
 
 				console.log('skybox loaded', skyboxComponent.currentId);
 			} else {
