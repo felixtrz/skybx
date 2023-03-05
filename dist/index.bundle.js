@@ -651,13 +651,28 @@ class GameSystem extends ecsy__WEBPACK_IMPORTED_MODULE_0__.System {
      * be user defined.
      */
     static queries;
+    _isImmersive = false;
     constructor(world, attributes) {
         super(world, attributes);
         this.core = _Core__WEBPACK_IMPORTED_MODULE_1__.Core.getInstance();
         this.config = attributes?.config;
     }
+    /** This function is called on the frames in which the app enters immersive */
+    initXR() { }
+    /** This function is called on the frames in which the app exits immersive */
+    exitXR() { }
     /** @ignore */
     execute(delta, time) {
+        const isImmersive = this.core.isImmersive();
+        if (isImmersive) {
+            if (!this._isImmersive)
+                this.initXR();
+        }
+        else {
+            if (this._isImmersive)
+                this.exitXR();
+        }
+        this._isImmersive = isImmersive;
         this.update(delta, time);
     }
     /**
@@ -707,9 +722,17 @@ class GameSystem extends ecsy__WEBPACK_IMPORTED_MODULE_0__.System {
 class XRGameSystem extends GameSystem {
     /** @ignore */
     execute(delta, time) {
-        if (this.core.isImmersive()) {
+        const isImmersive = this.core.isImmersive();
+        if (isImmersive) {
+            if (!this._isImmersive)
+                this.initXR();
             this.update(delta, time);
         }
+        else {
+            if (this._isImmersive)
+                this.exitXR();
+        }
+        this._isImmersive = isImmersive;
     }
 }
 class SingleUseGameSystem extends GameSystem {
@@ -21122,6 +21145,7 @@ const ANIMATION_STATES = {
 	Vanishing: 'vanishing',
 	Appearing: 'appearing',
 };
+const CAMERA_ANGULAR_SPEED = Math.PI / 36;
 
 const myHeaders = new Headers();
 myHeaders.append('Accept', 'application/json, text/plain, */*');
@@ -21177,11 +21201,25 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 		this.animationTimer = 0;
 	}
 
+	initXR() {
+		this.sphere?.scale.setScalar(1);
+	}
+
+	exitXR() {
+		this.core.inlineCamera.position.set(0, 1.7, 0);
+		this.core.inlineCamera.quaternion.set(0, 0, 0, 1);
+		this.sphere?.scale.setScalar(0.01);
+	}
+
 	update(delta, _time) {
 		this.fetchTimeout -= delta;
 		const skyboxComponent = this.queryGameObjects(
 			'game',
 		)[0].getMutableComponent(SkyboxComponent);
+
+		if (!this.core.isImmersive()) {
+			this.core.inlineCamera.rotateY(CAMERA_ANGULAR_SPEED * delta);
+		}
 
 		if (
 			!this.fetchInProgress &&
@@ -21200,6 +21238,7 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 					this.fetchInProgress = false;
 					this.fetchTimeout = 2;
 					const skyboxUrl = JSON.parse(result).file_url;
+					const thumbUrl = JSON.parse(result).thumb_url;
 					if (skyboxUrl) {
 						if (
 							!skyboxComponent.history.includes(skyboxComponent.requestedId)
@@ -21222,11 +21261,9 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 						);
 
 						loader.load(
-							skyboxUrl,
+							thumbUrl,
 							(texture) => {
-								texture.mapping = elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.EquirectangularReflectionMapping;
-								this.core.scene.background = texture;
-								this.core.scene.environment = texture;
+								this.newEnvTexture = texture;
 							},
 							undefined,
 							function () {
@@ -21262,6 +21299,12 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 				this.sphere = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Mesh(SKYBOX_GEOMETRY, material);
 				this.sphere.frustumCulled = false;
 				this.core.scene.add(this.sphere);
+				this.newEnvTexture.mapping = elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.EquirectangularReflectionMapping;
+				this.core.scene.environment = this.newEnvTexture;
+
+				if (!this.core.isImmersive()) {
+					this.sphere.scale.setScalar(0.01);
+				}
 
 				console.log('skybox loaded', skyboxComponent.currentId);
 			} else {
@@ -21402,6 +21445,14 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		this.activeController = null;
 	}
 
+	initXR() {
+		this.core.playerSpace.add(this.ui.container);
+	}
+
+	exitXR() {
+		this.core.playerSpace.remove(this.ui.container);
+	}
+
 	update(delta, _time) {
 		this._updateUIContainer(delta);
 
@@ -21445,10 +21496,6 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 	}
 
 	_updateUIContainer(delta) {
-		if (!this.ui.container.parent) {
-			this.core.playerSpace.add(this.ui.container);
-		}
-
 		if (
 			!this.isFollowing &&
 			Math.abs(this.ui.container.position.y - this.core.playerHead.position.y) >
@@ -21954,6 +22001,10 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	core.registerGameSystem(_WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__.WorldPanelSystem);
 	core.registerGameSystem(elixr__WEBPACK_IMPORTED_MODULE_2__.XRSnapTurnSystem);
 	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__.UIRenderSystem);
+
+	core.inlineCamera.fov = 80;
+	core.inlineCamera.updateProjectionMatrix();
+	core.scene.add(new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.AmbientLight(0xffffff, 0.5));
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');

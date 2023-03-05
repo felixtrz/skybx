@@ -45,6 +45,14 @@ export class UISystem extends XRGameSystem {
 		this.activeController = null;
 	}
 
+	initXR() {
+		this.core.playerSpace.add(this.ui.container);
+	}
+
+	exitXR() {
+		this.core.playerSpace.remove(this.ui.container);
+	}
+
 	update(delta, _time) {
 		this._updateUIContainer(delta);
 
@@ -88,10 +96,6 @@ export class UISystem extends XRGameSystem {
 	}
 
 	_updateUIContainer(delta) {
-		if (!this.ui.container.parent) {
-			this.core.playerSpace.add(this.ui.container);
-		}
-
 		if (
 			!this.isFollowing &&
 			Math.abs(this.ui.container.position.y - this.core.playerHead.position.y) >
