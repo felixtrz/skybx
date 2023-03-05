@@ -1,11 +1,12 @@
-import { BUTTONS, GameSystem, THREE } from 'elixr';
 import { Block, Text } from 'three-mesh-ui';
 import { COLORS, PROMPT_CATEGORIES } from './constants';
+import { GameSystem, THREE } from 'elixr';
 
 import { CategoryComponent } from './CategoryPanelSystem';
 import { KeyboardInputComponent } from './KeyboardSystem';
 import { SkyboxComponent } from './SkyboxLoadingSystem';
 import { UIComponent } from './UISystem';
+import { updateButtons } from './buttonUtil';
 
 const myHeaders = new Headers();
 myHeaders.append('Accept', 'application/json, text/plain, */*');
@@ -253,9 +254,6 @@ export class WorldPanelSystem extends GameSystem {
 	}
 
 	update() {
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
 		const generating = this.skybox.currentId !== this.skybox.requestedId;
 		if (generating && !this.wasGenerating) {
 			this.buttonText.set({ content: 'Generating...' });
@@ -264,42 +262,7 @@ export class WorldPanelSystem extends GameSystem {
 		}
 		this.wasGenerating = generating;
 
-		const intersect = this.buttons.reduce((closestIntersection, obj) => {
-			const intersection = this.ui.raycaster.intersectObject(obj, true);
-			if (!intersection[0]) return closestIntersection;
-			if (
-				!closestIntersection ||
-				intersection[0].distance < closestIntersection.distance
-			) {
-				intersection[0].object = obj;
-				return intersection[0];
-			}
-			return closestIntersection;
-		}, null);
-
-		const selectState = rightController.gamepad.getButtonUp(
-			BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
-		if (intersect && intersect.object.isUI) {
-			this.ui.raycaster.rayLength = Math.min(
-				this.ui.raycaster.rayLength,
-				intersect.distance,
-			);
-			if (selectState && intersect.object.currentState === 'hovered') {
-				if (intersect.object.states['selected'])
-					intersect.object.setState('selected');
-			} else if (!selectState) {
-				if (intersect.object.states['hovered'])
-					intersect.object.setState('hovered');
-			}
-		}
-
-		this.buttons.forEach((obj) => {
-			if ((!intersect || obj !== intersect.object) && obj.isUI) {
-				if (obj.states['idle']) obj.setState('idle');
-			}
-		});
+		updateButtons(this.buttons, this.ui);
 	}
 }
 
