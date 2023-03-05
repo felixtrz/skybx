@@ -309,13 +309,8 @@ class Core {
         this.RAPIER = RAPIER;
         this.registerGameComponent(_physics_RigidBodyComponent__WEBPACK_IMPORTED_MODULE_6__.RigidBody);
         this.registerGameComponent(_physics_ColliderComponent__WEBPACK_IMPORTED_MODULE_2__.Collider);
-        this.registerGameComponent(_physics_PhysicsSystem__WEBPACK_IMPORTED_MODULE_1__.PhysicsSystem.systemConfig);
-        this._gameManager.addComponent(_physics_PhysicsSystem__WEBPACK_IMPORTED_MODULE_1__.PhysicsSystem.systemConfig);
+        this.registerGameSystem(_physics_PhysicsSystem__WEBPACK_IMPORTED_MODULE_1__.PhysicsSystem, { priority: Infinity });
         const physicsConfig = this._gameManager.getMutableComponent(_physics_PhysicsSystem__WEBPACK_IMPORTED_MODULE_1__.PhysicsSystem.systemConfig);
-        this.registerGameSystem(_physics_PhysicsSystem__WEBPACK_IMPORTED_MODULE_1__.PhysicsSystem, {
-            priority: Infinity,
-            config: physicsConfig,
-        });
         physicsConfig.gravity = new _graphics_CustomTHREE__WEBPACK_IMPORTED_MODULE_8__.THREE.Vector3(0, 0, 0);
         physicsConfig.world = new RAPIER.World(physicsConfig.gravity);
         this._rapierWorld = physicsConfig.world;
@@ -20907,8 +20902,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
 /* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
+/* harmony import */ var _buttonUtil__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./buttonUtil */ "./src/buttonUtil.js");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__]);
 ([elixr__WEBPACK_IMPORTED_MODULE_0__, _UISystem__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -21004,45 +21001,8 @@ class KeyboardSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 
 	update() {
 		this.input.changed = false;
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
 
-		const intersect = this.keys.reduce((closestIntersection, obj) => {
-			const intersection = this.ui.raycaster.intersectObject(obj, true);
-			if (!intersection[0]) return closestIntersection;
-			if (
-				!closestIntersection ||
-				intersection[0].distance < closestIntersection.distance
-			) {
-				intersection[0].object = obj;
-				return intersection[0];
-			}
-			return closestIntersection;
-		}, null);
-
-		const selectState = rightController.gamepad.getButtonUp(
-			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
-		if (intersect && intersect.object.isUI) {
-			this.ui.raycaster.rayLength = Math.min(
-				this.ui.raycaster.rayLength,
-				intersect.distance,
-			);
-			if (selectState && intersect.object.currentState === 'hovered') {
-				if (intersect.object.states['selected'])
-					intersect.object.setState('selected');
-			} else if (!selectState) {
-				if (intersect.object.states['hovered'])
-					intersect.object.setState('hovered');
-			}
-		}
-
-		this.keys.forEach((obj) => {
-			if ((!intersect || obj !== intersect.object) && obj.isUI) {
-				if (obj.states['idle']) obj.setState('idle');
-			}
-		});
+		(0,_buttonUtil__WEBPACK_IMPORTED_MODULE_4__.updateButtons)(this.keys, this.ui);
 	}
 }
 
@@ -21277,7 +21237,10 @@ class SkyboxLoadingSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem 
 						console.log('skybox not ready', skyboxComponent.requestedId);
 					}
 				})
-				.catch((error) => console.log('error', error));
+				.catch((error) => {
+					this.fetchInProgress = false;
+					console.log('error', error);
+				});
 		}
 
 		if (this.state === ANIMATION_STATES.Ready) {
@@ -21421,48 +21384,70 @@ class UISystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.XRGameSystem {
 		this.ui.raycaster.far = 2;
 		this.isFollowing = false;
 		this.followingSpeed = 0;
+		this.ui.targetRay = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Line(
+			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.BufferGeometry().setFromPoints([
+				new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, 0),
+				new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, -1),
+			]),
+			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.LineBasicMaterial({
+				color: 0xffffff,
+			}),
+		);
 		this.ui.marker = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Mesh(
 			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.SphereGeometry(0.008, 32, 32),
 			new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.MeshBasicMaterial({
 				color: 0xffffff,
 			}),
 		);
+		this.activeController = null;
 	}
 
 	update(delta, _time) {
+		this._updateUIContainer(delta);
+
 		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
-		if (!this.ui.container.parent) {
-			this.core.playerSpace.add(this.ui.container);
+		const leftController = this.core.controllers['left'];
+		this.ui.selecting = false;
+		let actvieControllerChanged = false;
+		if (rightController?.gamepad.getButtonUp(elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER)) {
+			actvieControllerChanged = this.activeController !== rightController;
+			this.activeController = rightController;
+			this.ui.selecting = true;
+		} else if (
+			leftController?.gamepad.getButtonUp(elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER)
+		) {
+			actvieControllerChanged = this.activeController !== leftController;
+			this.activeController = leftController;
+			this.ui.selecting = true;
+		} else if (!this.activeController) {
+			this.activeController = rightController ?? leftController ?? null;
+			if (this.activeController) {
+				actvieControllerChanged = true;
+			}
 		}
-		if (!this.ui.targetRay) {
-			const material = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.LineBasicMaterial({
-				color: 0xffffff,
-			});
 
-			const points = [];
-			points.push(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, 0));
-			points.push(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(0, 0, -1));
+		if (!this.activeController) return;
 
-			const geometry = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.BufferGeometry().setFromPoints(points);
-
-			this.ui.targetRay = new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Line(geometry, material);
-			rightController.targetRaySpace.add(this.ui.targetRay);
-			rightController.targetRaySpace.add(this.ui.marker);
+		if (actvieControllerChanged) {
+			this.activeController.targetRaySpace.add(this.ui.targetRay);
+			this.activeController.targetRaySpace.add(this.ui.marker);
 		}
 
 		this.ui.raycaster.set(
-			rightController.targetRaySpace.getWorldPosition(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3()),
-			rightController.targetRaySpace
+			this.activeController.targetRaySpace.getWorldPosition(
+				new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3(),
+			),
+			this.activeController.targetRaySpace
 				.getWorldDirection(new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Vector3())
 				.negate(),
 		);
 		this.ui.raycaster.rayLength = 2;
+	}
 
-		this.ui.selecting = rightController.gamepad.getButtonUp(
-			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
-		);
+	_updateUIContainer(delta) {
+		if (!this.ui.container.parent) {
+			this.core.playerSpace.add(this.ui.container);
+		}
 
 		if (
 			!this.isFollowing &&
@@ -21515,15 +21500,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "WorldPanelSystem": () => (/* binding */ WorldPanelSystem)
 /* harmony export */ });
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
-/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three-mesh-ui */ "./node_modules/three-mesh-ui/build/three-mesh-ui.module.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
 /* harmony import */ var _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./CategoryPanelSystem */ "./src/CategoryPanelSystem.js");
 /* harmony import */ var _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./KeyboardSystem */ "./src/KeyboardSystem.js");
 /* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__]);
-([elixr__WEBPACK_IMPORTED_MODULE_0__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _buttonUtil__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./buttonUtil */ "./src/buttonUtil.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_2__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__]);
+([elixr__WEBPACK_IMPORTED_MODULE_2__, _CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_3__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_4__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__, _UISystem__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -21555,7 +21542,7 @@ myHeaders.append(
 myHeaders.append('sec-ch-ua-mobile', '?0');
 myHeaders.append('sec-ch-ua-platform', '"macOS"');
 
-class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
+class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_2__.GameSystem {
 	init() {
 		this.ui = this.queryGameObjects('ui')[0].getMutableComponent(_UISystem__WEBPACK_IMPORTED_MODULE_6__.UIComponent);
 		this.input = this.queryGameObjects('input')[0].getComponent(
@@ -21567,12 +21554,12 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 		this.skybox = this.queryGameObjects('skybox')[0].getMutableComponent(
 			_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_5__.SkyboxComponent,
 		);
-		const worldPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block({
+		const worldPanel = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block({
 			fontFamily: 'assets/Roboto-msdf.json',
 			fontTexture: 'assets/Roboto-msdf.png',
 			width: 0.4,
 			height: 0.41,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.panelBack),
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.panelBack),
 			backgroundOpacity: 0.8,
 			borderRadius: 0.03,
 			justifyContent: 'center',
@@ -21588,18 +21575,18 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			margin: 0.005,
 			padding: 0,
 			borderRadius: 0.03,
-			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+			backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 		};
 
-		const saveButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Save Skybox', fontSize: 0.04 }),
+		const saveButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Save Skybox', fontSize: 0.04 }),
 		);
 
 		saveButton.setupState({
 			state: 'idle',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21608,7 +21595,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'hovered',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.hovered),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21617,7 +21604,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'selected',
 			attributes: {
 				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.selected),
 				backgroundOpacity: 1,
 			},
 			onSet: () => {
@@ -21625,15 +21612,15 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			},
 		});
 
-		const backButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Previous World', fontSize: 0.04 }),
+		const backButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Previous World', fontSize: 0.04 }),
 		);
 
 		backButton.setupState({
 			state: 'idle',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21642,7 +21629,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'hovered',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.hovered),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21651,7 +21638,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'selected',
 			attributes: {
 				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.selected),
 				backgroundOpacity: 1,
 			},
 			onSet: () => {
@@ -21668,15 +21655,15 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			},
 		});
 
-		const forwardButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig).add(
-			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Next World', fontSize: 0.04 }),
+		const forwardButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(worldButtonConfig).add(
+			new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Next World', fontSize: 0.04 }),
 		);
 
 		forwardButton.setupState({
 			state: 'idle',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21685,7 +21672,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'hovered',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.hovered),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21694,7 +21681,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'selected',
 			attributes: {
 				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.selected),
 				backgroundOpacity: 1,
 			},
 			onSet: () => {
@@ -21705,16 +21692,16 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			},
 		});
 
-		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Block(worldButtonConfig);
+		this.generateButton = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Block(worldButtonConfig);
 
-		this.buttonText = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_1__.Text({ content: 'Generate', fontSize: 0.04 });
+		this.buttonText = new three_mesh_ui__WEBPACK_IMPORTED_MODULE_0__.Text({ content: 'Generate', fontSize: 0.04 });
 
 		this.generateButton.add(this.buttonText);
 		this.generateButton.setupState({
 			state: 'idle',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.button),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.button),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21723,7 +21710,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'hovered',
 			attributes: {
 				offset: 0.01,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.hovered),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.hovered),
 				backgroundOpacity: 1,
 			},
 		});
@@ -21732,7 +21719,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 			state: 'selected',
 			attributes: {
 				offset: 0.005,
-				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_0__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_2__.COLORS.selected),
+				backgroundColor: new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.Color(_constants__WEBPACK_IMPORTED_MODULE_1__.COLORS.selected),
 				backgroundOpacity: 1,
 			},
 			onSet: () => {
@@ -21740,7 +21727,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 				if (generating) return;
 				const raw = JSON.stringify({
 					prompt: this.input.text.length > 0 ? this.input.text : 'nothing',
-					styleId: _constants__WEBPACK_IMPORTED_MODULE_2__.PROMPT_CATEGORIES[this.category.key].styleId,
+					styleId: _constants__WEBPACK_IMPORTED_MODULE_1__.PROMPT_CATEGORIES[this.category.key].styleId,
 				});
 
 				this.requestOptions.body = raw;
@@ -21779,9 +21766,6 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 	}
 
 	update() {
-		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
 		const generating = this.skybox.currentId !== this.skybox.requestedId;
 		if (generating && !this.wasGenerating) {
 			this.buttonText.set({ content: 'Generating...' });
@@ -21790,42 +21774,7 @@ class WorldPanelSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
 		}
 		this.wasGenerating = generating;
 
-		const intersect = this.buttons.reduce((closestIntersection, obj) => {
-			const intersection = this.ui.raycaster.intersectObject(obj, true);
-			if (!intersection[0]) return closestIntersection;
-			if (
-				!closestIntersection ||
-				intersection[0].distance < closestIntersection.distance
-			) {
-				intersection[0].object = obj;
-				return intersection[0];
-			}
-			return closestIntersection;
-		}, null);
-
-		const selectState = rightController.gamepad.getButtonUp(
-			elixr__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER,
-		);
-
-		if (intersect && intersect.object.isUI) {
-			this.ui.raycaster.rayLength = Math.min(
-				this.ui.raycaster.rayLength,
-				intersect.distance,
-			);
-			if (selectState && intersect.object.currentState === 'hovered') {
-				if (intersect.object.states['selected'])
-					intersect.object.setState('selected');
-			} else if (!selectState) {
-				if (intersect.object.states['hovered'])
-					intersect.object.setState('hovered');
-			}
-		}
-
-		this.buttons.forEach((obj) => {
-			if ((!intersect || obj !== intersect.object) && obj.isUI) {
-				if (obj.states['idle']) obj.setState('idle');
-			}
-		});
+		(0,_buttonUtil__WEBPACK_IMPORTED_MODULE_7__.updateButtons)(this.buttons, this.ui);
 	}
 }
 

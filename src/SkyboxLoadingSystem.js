@@ -123,7 +123,10 @@ export class SkyboxLoadingSystem extends GameSystem {
 						console.log('skybox not ready', skyboxComponent.requestedId);
 					}
 				})
-				.catch((error) => console.log('error', error));
+				.catch((error) => {
+					this.fetchInProgress = false;
+					console.log('error', error);
+				});
 		}
 
 		if (this.state === ANIMATION_STATES.Ready) {

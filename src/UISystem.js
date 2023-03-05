@@ -27,48 +27,70 @@ export class UISystem extends XRGameSystem {
 		this.ui.raycaster.far = 2;
 		this.isFollowing = false;
 		this.followingSpeed = 0;
+		this.ui.targetRay = new THREE.Line(
+			new THREE.BufferGeometry().setFromPoints([
+				new THREE.Vector3(0, 0, 0),
+				new THREE.Vector3(0, 0, -1),
+			]),
+			new THREE.LineBasicMaterial({
+				color: 0xffffff,
+			}),
+		);
 		this.ui.marker = new THREE.Mesh(
 			new THREE.SphereGeometry(0.008, 32, 32),
 			new THREE.MeshBasicMaterial({
 				color: 0xffffff,
 			}),
 		);
+		this.activeController = null;
 	}
 
 	update(delta, _time) {
+		this._updateUIContainer(delta);
+
 		const rightController = this.core.controllers['right'];
-		if (!rightController) return;
-
-		if (!this.ui.container.parent) {
-			this.core.playerSpace.add(this.ui.container);
+		const leftController = this.core.controllers['left'];
+		this.ui.selecting = false;
+		let actvieControllerChanged = false;
+		if (rightController?.gamepad.getButtonUp(BUTTONS.XR_STANDARD.TRIGGER)) {
+			actvieControllerChanged = this.activeController !== rightController;
+			this.activeController = rightController;
+			this.ui.selecting = true;
+		} else if (
+			leftController?.gamepad.getButtonUp(BUTTONS.XR_STANDARD.TRIGGER)
+		) {
+			actvieControllerChanged = this.activeController !== leftController;
+			this.activeController = leftController;
+			this.ui.selecting = true;
+		} else if (!this.activeController) {
+			this.activeController = rightController ?? leftController ?? null;
+			if (this.activeController) {
+				actvieControllerChanged = true;
+			}
 		}
-		if (!this.ui.targetRay) {
-			const material = new THREE.LineBasicMaterial({
-				color: 0xffffff,
-			});
 
-			const points = [];
-			points.push(new THREE.Vector3(0, 0, 0));
-			points.push(new THREE.Vector3(0, 0, -1));
+		if (!this.activeController) return;
 
-			const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-			this.ui.targetRay = new THREE.Line(geometry, material);
-			rightController.targetRaySpace.add(this.ui.targetRay);
-			rightController.targetRaySpace.add(this.ui.marker);
+		if (actvieControllerChanged) {
+			this.activeController.targetRaySpace.add(this.ui.targetRay);
+			this.activeController.targetRaySpace.add(this.ui.marker);
 		}
 
 		this.ui.raycaster.set(
-			rightController.targetRaySpace.getWorldPosition(new THREE.Vector3()),
-			rightController.targetRaySpace
+			this.activeController.targetRaySpace.getWorldPosition(
+				new THREE.Vector3(),
+			),
+			this.activeController.targetRaySpace
 				.getWorldDirection(new THREE.Vector3())
 				.negate(),
 		);
 		this.ui.raycaster.rayLength = 2;
+	}
 
-		this.ui.selecting = rightController.gamepad.getButtonUp(
-			BUTTONS.XR_STANDARD.TRIGGER,
-		);
+	_updateUIContainer(delta) {
+		if (!this.ui.container.parent) {
+			this.core.playerSpace.add(this.ui.container);
+		}
 
 		if (
 			!this.isFollowing &&
