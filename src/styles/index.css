@@ -127,71 +127,26 @@
 	background-color: #8f00ff;
 }
 
-#gravity-controls {
+#prompt-group {
 	position: fixed;
 	bottom: 10px;
 	left: 10px;
 	width: calc(100vw - 20px);
-	padding: 15px 20px;
+	padding: 10px;
 	background-color: #333333;
-	border-radius: 25px;
+	border-radius: 15px;
 	opacity: 0;
 	transition: all 0.3s;
 }
 
-.gravity-sliders {
-	font-size: 0;
+#prompt-group > button {
+	color: #a7a7a7;
+	border-color: #a7a7a7;
 }
 
-.gravity-slider {
-	appearance: none;
-	width: calc((100% - 110px) / 3);
-	height: 10px;
-	background: #d3d3d3;
-	outline: none;
-	opacity: 0.9;
-	border-radius: 5px;
-	transition: opacity 0.2s;
-	padding: 8px;
-	margin-right: 10px;
-}
-
-.gravity-slider:last-child {
-	margin-right: 0;
-}
-
-#gravity-controls > h4 {
-	color: #ffffff;
-	padding-right: 24px;
-}
-
-.gravity-slider:hover {
-	opacity: 1;
-}
-
-.gravity-slider::-webkit-slider-thumb {
-	appearance: none;
-	width: 8px;
-	height: 16px;
-	background: #8f00ff;
-	cursor: pointer;
-}
-
-.gravity-slider::-moz-range-thumb {
-	width: 8px;
-	height: 16px;
-	background: #8f00ff;
-	cursor: pointer;
-}
-
-.slider-label {
-	color: #ffffff;
-	font-size: 20px;
-	height: 16px;
-	width: 20px;
-	margin-right: 10px;
-	display: inline-block;
-	text-align: center;
+#prompt-group > button:hover {
+	border-color: #8f00ff;
+	background-color: #8f00ff;
 }
 
 .fold {

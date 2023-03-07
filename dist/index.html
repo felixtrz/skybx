@@ -50,9 +50,6 @@
 	<script defer src="index.bundle.js"></script></head>
 	<body style="margin: 0">
 		<div id="scene-container" style="display: block"></div>
-		<!-- <div style="position: fixed; right: 10px; bottom: 10px">
-			<button id="vr-button">Enter VR</button>
-		</div> -->
 
 		<div class="nav-bar">
 			<div class="icon-outer">
@@ -73,6 +70,27 @@
 					>BlockadeLabs</a
 				>
 			</div>
+		</div>
+
+		<div id="prompt-group" class="input-group">
+			<input
+				id="prompt-text"
+				type="text"
+				class="form-control"
+				placeholder="Imagine..."
+			/>
+			<button id="prompt-send" class="btn btn-outline-secondary" type="button">
+				<img src="assets/send.png" id="send-icon" style="height: 1em" />
+				<div
+					id="gen-spinner"
+					class="spinner-grow"
+					style="height: 1em; width: 1em; display: none"
+					role="status"
+				></div>
+			</button>
+			<button id="exit-prompt" class="btn btn-outline-secondary" type="button">
+				<img src="assets/escape.png" style="height: 1em" />
+			</button>
 		</div>
 
 		<div id="ui-panel" class="card">
@@ -107,6 +125,9 @@
 							class="btn action-button"
 						>
 							OPEN ON META QUEST
+						</button>
+						<button id="2d-button" type="button" class="btn action-button">
+							TRY IN 2D
 						</button>
 					</div>
 				</div>

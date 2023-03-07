@@ -7,6 +7,7 @@ import { SkyboxComponent, SkyboxLoadingSystem } from './SkyboxLoadingSystem';
 import { UIComponent, UISystem } from './UISystem';
 
 import { BannerPanelSystem } from './BannerPanelSystem';
+import { InlineGenSystem } from './InlineGenSystem';
 import { PromptPanelSystem } from './PromptPanelSystem';
 import { UIRenderSystem } from './UIRenderSystem';
 import { WorldPanelSystem } from './WorldPanelSystem';
@@ -32,11 +33,11 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.registerGameSystem(WorldPanelSystem);
 	core.registerGameSystem(XRSnapTurnSystem);
 	core.registerGameSystem(UIRenderSystem);
+	core.registerGameSystem(InlineGenSystem);
 
 	core.inlineCamera.fov = 80;
 	core.inlineCamera.updateProjectionMatrix();
 	core.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-	core.renderer.xr.setFoveation(0);
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');

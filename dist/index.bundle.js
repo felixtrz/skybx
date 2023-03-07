@@ -22,7 +22,7 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_cssWithMappingToString_js__WEBPACK_IMPORTED_MODULE_0___default()));
 ___CSS_LOADER_EXPORT___.push([module.id, "@import url(https://fonts.cdnfonts.com/css/space-mono);"]);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "#scene-container {\n\twidth: 100%;\n\theight: 70vh;\n}\n\n.nav-bar {\n\tfont-family: 'Space Mono', sans-serif;\n\tposition: fixed;\n\ttop: 10px;\n\tleft: 10px;\n\tbackground-color: #333333;\n\twidth: calc(100vw - 20px);\n\theight: 50px;\n\tborder-radius: 25px;\n\topacity: 0.8;\n\ttransition: opacity 0.7s;\n}\n\n.nav-bar:hover {\n\topacity: 1;\n}\n\n.app-name {\n\tposition: absolute;\n\tfont-weight: lighter !important;\n\ttop: 0;\n\tleft: 60px;\n\tfont-size: 32px;\n\tcolor: #ffffff;\n\tletter-spacing: 0.6rem;\n}\n\n.nav-links {\n\tposition: absolute;\n\ttop: 12px;\n\tright: 5px;\n}\n\n.nav-links a,\n.links-panel a {\n\tcolor: #ffffff;\n\tfont-size: 18px;\n\tletter-spacing: 0.15rem;\n\ttext-decoration: none;\n\tpadding-right: 15px;\n}\n\n.nav-links a:hover {\n\ttext-decoration: underline;\n}\n\n.icon-outer {\n\tposition: absolute;\n\ttop: 5px;\n\tleft: 5px;\n\twidth: 40px;\n\theight: 40px;\n\tborder: 5px solid #8f00ff;\n\tborder-radius: 50% 0 50% 50%;\n\ttransition: transform 0.7s ease-in-out;\n}\n\n.nav-bar:hover .icon-outer {\n\ttransform: rotate(45deg);\n}\n\n.icon-inner {\n\tposition: absolute;\n\ttop: 7px;\n\tleft: 11px;\n\twidth: 8px;\n\theight: 16px;\n\tborder-radius: 4px;\n\tbackground-color: #777777;\n}\n\n.main-box {\n\tposition: fixed;\n\twidth: 25rem;\n\theight: 25rem;\n\ttop: calc((100vh - 25rem) / 2);\n\tleft: calc((100vw - 25rem) / 2);\n}\n\n.intro-box {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 25rem;\n\theight: calc(22rem - 5px);\n\tbackground-color: #333333;\n\tborder-radius: 25px 25px 0px 25px;\n\topacity: 1;\n\tcolor: white;\n}\n\n#ui-panel {\n\tposition: fixed;\n\tbottom: 0;\n\t/* left: 20px;\n\twidth: calc(100vw - 40px); */\n\tborder-radius: 0;\n\tcolor: white;\n\tbackground-color: #333333;\n\topacity: 0.9;\n\twidth: 100vw;\n\ttransition: all 0.7s;\n}\n\n#ui-panel:hover {\n\topacity: 1;\n}\n\n.action-button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n\tborder-radius: 0;\n\tmargin-right: 5px;\n\tmargin-top: 5px;\n}\n\n.action-button:hover {\n\tcolor: #ffffff;\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n#gravity-controls {\n\tposition: fixed;\n\tbottom: 10px;\n\tleft: 10px;\n\twidth: calc(100vw - 20px);\n\tpadding: 15px 20px;\n\tbackground-color: #333333;\n\tborder-radius: 25px;\n\topacity: 0;\n\ttransition: all 0.3s;\n}\n\n.gravity-sliders {\n\tfont-size: 0;\n}\n\n.gravity-slider {\n\tappearance: none;\n\twidth: calc((100% - 110px) / 3);\n\theight: 10px;\n\tbackground: #d3d3d3;\n\toutline: none;\n\topacity: 0.9;\n\tborder-radius: 5px;\n\ttransition: opacity 0.2s;\n\tpadding: 8px;\n\tmargin-right: 10px;\n}\n\n.gravity-slider:last-child {\n\tmargin-right: 0;\n}\n\n#gravity-controls > h4 {\n\tcolor: #ffffff;\n\tpadding-right: 24px;\n}\n\n.gravity-slider:hover {\n\topacity: 1;\n}\n\n.gravity-slider::-webkit-slider-thumb {\n\tappearance: none;\n\twidth: 8px;\n\theight: 16px;\n\tbackground: #8f00ff;\n\tcursor: pointer;\n}\n\n.gravity-slider::-moz-range-thumb {\n\twidth: 8px;\n\theight: 16px;\n\tbackground: #8f00ff;\n\tcursor: pointer;\n}\n\n.slider-label {\n\tcolor: #ffffff;\n\tfont-size: 20px;\n\theight: 16px;\n\twidth: 20px;\n\tmargin-right: 10px;\n\tdisplay: inline-block;\n\ttext-align: center;\n}\n\n.fold {\n\tborder: none;\n\tbackground-color: transparent;\n\tfont-family: 'Space Mono', sans-serif;\n\tmax-width: 20px !important;\n\theight: 20px;\n\tcolor: #ffffff;\n\tpadding: auto;\n}\n\n.fold-vertical-line {\n\tposition: absolute;\n\ttop: 0;\n\tright: 8px;\n\twidth: 4px;\n\theight: 20px;\n\tbackground-color: #ffffff;\n}\n\n.fold-horizontal-line {\n\tposition: absolute;\n\ttop: 8px;\n\tright: 0px;\n\twidth: 20px;\n\theight: 4px;\n\tbackground-color: #ffffff;\n}\n\n#fold-gravity-controls {\n\tposition: absolute;\n\ttop: 16px;\n\tright: 24px;\n}\n\n#fold-links {\n\tdisplay: none;\n\tposition: absolute;\n\ttop: 15px;\n\tright: 20px;\n}\n\n.links-panel {\n\tdisplay: none;\n}\n\n@media only screen and (max-width: 500px) {\n\t#fold-links {\n\t\tdisplay: block;\n\t}\n\n\t.nav-links {\n\t\tdisplay: none;\n\t}\n\n\t.links-panel {\n\t\tdisplay: none;\n\t\tbackground-color: #333333;\n\t\tborder-radius: 25px;\n\t\tposition: absolute;\n\t\ttop: 56px;\n\t\tright: 0;\n\t}\n\n\t.links-panel > a {\n\t\tdisplay: block;\n\t\tpadding: 10px 20px;\n\t}\n\n\t.gravity-slider {\n\t\twidth: calc(100% - 30px);\n\t\tmargin: 8px 0;\n\t}\n}\n\n.counter {\n\tborder-radius: 5px;\n\tpadding: 0 5px;\n\tbackground-color: #ffffff !important;\n\tcolor: #333333;\n\tfont-weight: bolder;\n}\n", "",{"version":3,"sources":["webpack://./src/styles/index.css"],"names":[],"mappings":"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","sourcesContent":["@import url('https://fonts.cdnfonts.com/css/space-mono');\n\n#scene-container {\n\twidth: 100%;\n\theight: 70vh;\n}\n\n.nav-bar {\n\tfont-family: 'Space Mono', sans-serif;\n\tposition: fixed;\n\ttop: 10px;\n\tleft: 10px;\n\tbackground-color: #333333;\n\twidth: calc(100vw - 20px);\n\theight: 50px;\n\tborder-radius: 25px;\n\topacity: 0.8;\n\ttransition: opacity 0.7s;\n}\n\n.nav-bar:hover {\n\topacity: 1;\n}\n\n.app-name {\n\tposition: absolute;\n\tfont-weight: lighter !important;\n\ttop: 0;\n\tleft: 60px;\n\tfont-size: 32px;\n\tcolor: #ffffff;\n\tletter-spacing: 0.6rem;\n}\n\n.nav-links {\n\tposition: absolute;\n\ttop: 12px;\n\tright: 5px;\n}\n\n.nav-links a,\n.links-panel a {\n\tcolor: #ffffff;\n\tfont-size: 18px;\n\tletter-spacing: 0.15rem;\n\ttext-decoration: none;\n\tpadding-right: 15px;\n}\n\n.nav-links a:hover {\n\ttext-decoration: underline;\n}\n\n.icon-outer {\n\tposition: absolute;\n\ttop: 5px;\n\tleft: 5px;\n\twidth: 40px;\n\theight: 40px;\n\tborder: 5px solid #8f00ff;\n\tborder-radius: 50% 0 50% 50%;\n\ttransition: transform 0.7s ease-in-out;\n}\n\n.nav-bar:hover .icon-outer {\n\ttransform: rotate(45deg);\n}\n\n.icon-inner {\n\tposition: absolute;\n\ttop: 7px;\n\tleft: 11px;\n\twidth: 8px;\n\theight: 16px;\n\tborder-radius: 4px;\n\tbackground-color: #777777;\n}\n\n.main-box {\n\tposition: fixed;\n\twidth: 25rem;\n\theight: 25rem;\n\ttop: calc((100vh - 25rem) / 2);\n\tleft: calc((100vw - 25rem) / 2);\n}\n\n.intro-box {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 25rem;\n\theight: calc(22rem - 5px);\n\tbackground-color: #333333;\n\tborder-radius: 25px 25px 0px 25px;\n\topacity: 1;\n\tcolor: white;\n}\n\n#ui-panel {\n\tposition: fixed;\n\tbottom: 0;\n\t/* left: 20px;\n\twidth: calc(100vw - 40px); */\n\tborder-radius: 0;\n\tcolor: white;\n\tbackground-color: #333333;\n\topacity: 0.9;\n\twidth: 100vw;\n\ttransition: all 0.7s;\n}\n\n#ui-panel:hover {\n\topacity: 1;\n}\n\n.action-button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n\tborder-radius: 0;\n\tmargin-right: 5px;\n\tmargin-top: 5px;\n}\n\n.action-button:hover {\n\tcolor: #ffffff;\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n#gravity-controls {\n\tposition: fixed;\n\tbottom: 10px;\n\tleft: 10px;\n\twidth: calc(100vw - 20px);\n\tpadding: 15px 20px;\n\tbackground-color: #333333;\n\tborder-radius: 25px;\n\topacity: 0;\n\ttransition: all 0.3s;\n}\n\n.gravity-sliders {\n\tfont-size: 0;\n}\n\n.gravity-slider {\n\tappearance: none;\n\twidth: calc((100% - 110px) / 3);\n\theight: 10px;\n\tbackground: #d3d3d3;\n\toutline: none;\n\topacity: 0.9;\n\tborder-radius: 5px;\n\ttransition: opacity 0.2s;\n\tpadding: 8px;\n\tmargin-right: 10px;\n}\n\n.gravity-slider:last-child {\n\tmargin-right: 0;\n}\n\n#gravity-controls > h4 {\n\tcolor: #ffffff;\n\tpadding-right: 24px;\n}\n\n.gravity-slider:hover {\n\topacity: 1;\n}\n\n.gravity-slider::-webkit-slider-thumb {\n\tappearance: none;\n\twidth: 8px;\n\theight: 16px;\n\tbackground: #8f00ff;\n\tcursor: pointer;\n}\n\n.gravity-slider::-moz-range-thumb {\n\twidth: 8px;\n\theight: 16px;\n\tbackground: #8f00ff;\n\tcursor: pointer;\n}\n\n.slider-label {\n\tcolor: #ffffff;\n\tfont-size: 20px;\n\theight: 16px;\n\twidth: 20px;\n\tmargin-right: 10px;\n\tdisplay: inline-block;\n\ttext-align: center;\n}\n\n.fold {\n\tborder: none;\n\tbackground-color: transparent;\n\tfont-family: 'Space Mono', sans-serif;\n\tmax-width: 20px !important;\n\theight: 20px;\n\tcolor: #ffffff;\n\tpadding: auto;\n}\n\n.fold-vertical-line {\n\tposition: absolute;\n\ttop: 0;\n\tright: 8px;\n\twidth: 4px;\n\theight: 20px;\n\tbackground-color: #ffffff;\n}\n\n.fold-horizontal-line {\n\tposition: absolute;\n\ttop: 8px;\n\tright: 0px;\n\twidth: 20px;\n\theight: 4px;\n\tbackground-color: #ffffff;\n}\n\n#fold-gravity-controls {\n\tposition: absolute;\n\ttop: 16px;\n\tright: 24px;\n}\n\n#fold-links {\n\tdisplay: none;\n\tposition: absolute;\n\ttop: 15px;\n\tright: 20px;\n}\n\n.links-panel {\n\tdisplay: none;\n}\n\n@media only screen and (max-width: 500px) {\n\t#fold-links {\n\t\tdisplay: block;\n\t}\n\n\t.nav-links {\n\t\tdisplay: none;\n\t}\n\n\t.links-panel {\n\t\tdisplay: none;\n\t\tbackground-color: #333333;\n\t\tborder-radius: 25px;\n\t\tposition: absolute;\n\t\ttop: 56px;\n\t\tright: 0;\n\t}\n\n\t.links-panel > a {\n\t\tdisplay: block;\n\t\tpadding: 10px 20px;\n\t}\n\n\t.gravity-slider {\n\t\twidth: calc(100% - 30px);\n\t\tmargin: 8px 0;\n\t}\n}\n\n.counter {\n\tborder-radius: 5px;\n\tpadding: 0 5px;\n\tbackground-color: #ffffff !important;\n\tcolor: #333333;\n\tfont-weight: bolder;\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "#scene-container {\n\twidth: 100%;\n\theight: 70vh;\n}\n\n.nav-bar {\n\tfont-family: 'Space Mono', sans-serif;\n\tposition: fixed;\n\ttop: 10px;\n\tleft: 10px;\n\tbackground-color: #333333;\n\twidth: calc(100vw - 20px);\n\theight: 50px;\n\tborder-radius: 25px;\n\topacity: 0.8;\n\ttransition: opacity 0.7s;\n}\n\n.nav-bar:hover {\n\topacity: 1;\n}\n\n.app-name {\n\tposition: absolute;\n\tfont-weight: lighter !important;\n\ttop: 0;\n\tleft: 60px;\n\tfont-size: 32px;\n\tcolor: #ffffff;\n\tletter-spacing: 0.6rem;\n}\n\n.nav-links {\n\tposition: absolute;\n\ttop: 12px;\n\tright: 5px;\n}\n\n.nav-links a,\n.links-panel a {\n\tcolor: #ffffff;\n\tfont-size: 18px;\n\tletter-spacing: 0.15rem;\n\ttext-decoration: none;\n\tpadding-right: 15px;\n}\n\n.nav-links a:hover {\n\ttext-decoration: underline;\n}\n\n.icon-outer {\n\tposition: absolute;\n\ttop: 5px;\n\tleft: 5px;\n\twidth: 40px;\n\theight: 40px;\n\tborder: 5px solid #8f00ff;\n\tborder-radius: 50% 0 50% 50%;\n\ttransition: transform 0.7s ease-in-out;\n}\n\n.nav-bar:hover .icon-outer {\n\ttransform: rotate(45deg);\n}\n\n.icon-inner {\n\tposition: absolute;\n\ttop: 7px;\n\tleft: 11px;\n\twidth: 8px;\n\theight: 16px;\n\tborder-radius: 4px;\n\tbackground-color: #777777;\n}\n\n.main-box {\n\tposition: fixed;\n\twidth: 25rem;\n\theight: 25rem;\n\ttop: calc((100vh - 25rem) / 2);\n\tleft: calc((100vw - 25rem) / 2);\n}\n\n.intro-box {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 25rem;\n\theight: calc(22rem - 5px);\n\tbackground-color: #333333;\n\tborder-radius: 25px 25px 0px 25px;\n\topacity: 1;\n\tcolor: white;\n}\n\n#ui-panel {\n\tposition: fixed;\n\tbottom: 0;\n\t/* left: 20px;\n\twidth: calc(100vw - 40px); */\n\tborder-radius: 0;\n\tcolor: white;\n\tbackground-color: #333333;\n\topacity: 0.9;\n\twidth: 100vw;\n\ttransition: all 0.7s;\n}\n\n#ui-panel:hover {\n\topacity: 1;\n}\n\n.action-button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n\tborder-radius: 0;\n\tmargin-right: 5px;\n\tmargin-top: 5px;\n}\n\n.action-button:hover {\n\tcolor: #ffffff;\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n#prompt-group {\n\tposition: fixed;\n\tbottom: 10px;\n\tleft: 10px;\n\twidth: calc(100vw - 20px);\n\tpadding: 10px;\n\tbackground-color: #333333;\n\tborder-radius: 15px;\n\topacity: 0;\n\ttransition: all 0.3s;\n}\n\n#prompt-group > button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n}\n\n#prompt-group > button:hover {\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n.fold {\n\tborder: none;\n\tbackground-color: transparent;\n\tfont-family: 'Space Mono', sans-serif;\n\tmax-width: 20px !important;\n\theight: 20px;\n\tcolor: #ffffff;\n\tpadding: auto;\n}\n\n.fold-vertical-line {\n\tposition: absolute;\n\ttop: 0;\n\tright: 8px;\n\twidth: 4px;\n\theight: 20px;\n\tbackground-color: #ffffff;\n}\n\n.fold-horizontal-line {\n\tposition: absolute;\n\ttop: 8px;\n\tright: 0px;\n\twidth: 20px;\n\theight: 4px;\n\tbackground-color: #ffffff;\n}\n\n#fold-gravity-controls {\n\tposition: absolute;\n\ttop: 16px;\n\tright: 24px;\n}\n\n#fold-links {\n\tdisplay: none;\n\tposition: absolute;\n\ttop: 15px;\n\tright: 20px;\n}\n\n.links-panel {\n\tdisplay: none;\n}\n\n@media only screen and (max-width: 500px) {\n\t#fold-links {\n\t\tdisplay: block;\n\t}\n\n\t.nav-links {\n\t\tdisplay: none;\n\t}\n\n\t.links-panel {\n\t\tdisplay: none;\n\t\tbackground-color: #333333;\n\t\tborder-radius: 25px;\n\t\tposition: absolute;\n\t\ttop: 56px;\n\t\tright: 0;\n\t}\n\n\t.links-panel > a {\n\t\tdisplay: block;\n\t\tpadding: 10px 20px;\n\t}\n\n\t.gravity-slider {\n\t\twidth: calc(100% - 30px);\n\t\tmargin: 8px 0;\n\t}\n}\n\n.counter {\n\tborder-radius: 5px;\n\tpadding: 0 5px;\n\tbackground-color: #ffffff !important;\n\tcolor: #333333;\n\tfont-weight: bolder;\n}\n", "",{"version":3,"sources":["webpack://./src/styles/index.css"],"names":[],"mappings":"AAEA;CACC,WAAW;CACX,YAAY;AACb;;AAEA;CACC,qCAAqC;CACrC,eAAe;CACf,SAAS;CACT,UAAU;CACV,yBAAyB;CACzB,yBAAyB;CACzB,YAAY;CACZ,mBAAmB;CACnB,YAAY;CACZ,wBAAwB;AACzB;;AAEA;CACC,UAAU;AACX;;AAEA;CACC,kBAAkB;CAClB,+BAA+B;CAC/B,MAAM;CACN,UAAU;CACV,eAAe;CACf,cAAc;CACd,sBAAsB;AACvB;;AAEA;CACC,kBAAkB;CAClB,SAAS;CACT,UAAU;AACX;;AAEA;;CAEC,cAAc;CACd,eAAe;CACf,uBAAuB;CACvB,qBAAqB;CACrB,mBAAmB;AACpB;;AAEA;CACC,0BAA0B;AAC3B;;AAEA;CACC,kBAAkB;CAClB,QAAQ;CACR,SAAS;CACT,WAAW;CACX,YAAY;CACZ,yBAAyB;CACzB,4BAA4B;CAC5B,sCAAsC;AACvC;;AAEA;CACC,wBAAwB;AACzB;;AAEA;CACC,kBAAkB;CAClB,QAAQ;CACR,UAAU;CACV,UAAU;CACV,YAAY;CACZ,kBAAkB;CAClB,yBAAyB;AAC1B;;AAEA;CACC,eAAe;CACf,YAAY;CACZ,aAAa;CACb,8BAA8B;CAC9B,+BAA+B;AAChC;;AAEA;CACC,kBAAkB;CAClB,MAAM;CACN,OAAO;CACP,YAAY;CACZ,yBAAyB;CACzB,yBAAyB;CACzB,iCAAiC;CACjC,UAAU;CACV,YAAY;AACb;;AAEA;CACC,eAAe;CACf,SAAS;CACT;6BAC4B;CAC5B,gBAAgB;CAChB,YAAY;CACZ,yBAAyB;CACzB,YAAY;CACZ,YAAY;CACZ,oBAAoB;AACrB;;AAEA;CACC,UAAU;AACX;;AAEA;CACC,cAAc;CACd,qBAAqB;CACrB,gBAAgB;CAChB,iBAAiB;CACjB,eAAe;AAChB;;AAEA;CACC,cAAc;CACd,qBAAqB;CACrB,yBAAyB;AAC1B;;AAEA;CACC,eAAe;CACf,YAAY;CACZ,UAAU;CACV,yBAAyB;CACzB,aAAa;CACb,yBAAyB;CACzB,mBAAmB;CACnB,UAAU;CACV,oBAAoB;AACrB;;AAEA;CACC,cAAc;CACd,qBAAqB;AACtB;;AAEA;CACC,qBAAqB;CACrB,yBAAyB;AAC1B;;AAEA;CACC,YAAY;CACZ,6BAA6B;CAC7B,qCAAqC;CACrC,0BAA0B;CAC1B,YAAY;CACZ,cAAc;CACd,aAAa;AACd;;AAEA;CACC,kBAAkB;CAClB,MAAM;CACN,UAAU;CACV,UAAU;CACV,YAAY;CACZ,yBAAyB;AAC1B;;AAEA;CACC,kBAAkB;CAClB,QAAQ;CACR,UAAU;CACV,WAAW;CACX,WAAW;CACX,yBAAyB;AAC1B;;AAEA;CACC,kBAAkB;CAClB,SAAS;CACT,WAAW;AACZ;;AAEA;CACC,aAAa;CACb,kBAAkB;CAClB,SAAS;CACT,WAAW;AACZ;;AAEA;CACC,aAAa;AACd;;AAEA;CACC;EACC,cAAc;CACf;;CAEA;EACC,aAAa;CACd;;CAEA;EACC,aAAa;EACb,yBAAyB;EACzB,mBAAmB;EACnB,kBAAkB;EAClB,SAAS;EACT,QAAQ;CACT;;CAEA;EACC,cAAc;EACd,kBAAkB;CACnB;;CAEA;EACC,wBAAwB;EACxB,aAAa;CACd;AACD;;AAEA;CACC,kBAAkB;CAClB,cAAc;CACd,oCAAoC;CACpC,cAAc;CACd,mBAAmB;AACpB","sourcesContent":["@import url('https://fonts.cdnfonts.com/css/space-mono');\n\n#scene-container {\n\twidth: 100%;\n\theight: 70vh;\n}\n\n.nav-bar {\n\tfont-family: 'Space Mono', sans-serif;\n\tposition: fixed;\n\ttop: 10px;\n\tleft: 10px;\n\tbackground-color: #333333;\n\twidth: calc(100vw - 20px);\n\theight: 50px;\n\tborder-radius: 25px;\n\topacity: 0.8;\n\ttransition: opacity 0.7s;\n}\n\n.nav-bar:hover {\n\topacity: 1;\n}\n\n.app-name {\n\tposition: absolute;\n\tfont-weight: lighter !important;\n\ttop: 0;\n\tleft: 60px;\n\tfont-size: 32px;\n\tcolor: #ffffff;\n\tletter-spacing: 0.6rem;\n}\n\n.nav-links {\n\tposition: absolute;\n\ttop: 12px;\n\tright: 5px;\n}\n\n.nav-links a,\n.links-panel a {\n\tcolor: #ffffff;\n\tfont-size: 18px;\n\tletter-spacing: 0.15rem;\n\ttext-decoration: none;\n\tpadding-right: 15px;\n}\n\n.nav-links a:hover {\n\ttext-decoration: underline;\n}\n\n.icon-outer {\n\tposition: absolute;\n\ttop: 5px;\n\tleft: 5px;\n\twidth: 40px;\n\theight: 40px;\n\tborder: 5px solid #8f00ff;\n\tborder-radius: 50% 0 50% 50%;\n\ttransition: transform 0.7s ease-in-out;\n}\n\n.nav-bar:hover .icon-outer {\n\ttransform: rotate(45deg);\n}\n\n.icon-inner {\n\tposition: absolute;\n\ttop: 7px;\n\tleft: 11px;\n\twidth: 8px;\n\theight: 16px;\n\tborder-radius: 4px;\n\tbackground-color: #777777;\n}\n\n.main-box {\n\tposition: fixed;\n\twidth: 25rem;\n\theight: 25rem;\n\ttop: calc((100vh - 25rem) / 2);\n\tleft: calc((100vw - 25rem) / 2);\n}\n\n.intro-box {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 25rem;\n\theight: calc(22rem - 5px);\n\tbackground-color: #333333;\n\tborder-radius: 25px 25px 0px 25px;\n\topacity: 1;\n\tcolor: white;\n}\n\n#ui-panel {\n\tposition: fixed;\n\tbottom: 0;\n\t/* left: 20px;\n\twidth: calc(100vw - 40px); */\n\tborder-radius: 0;\n\tcolor: white;\n\tbackground-color: #333333;\n\topacity: 0.9;\n\twidth: 100vw;\n\ttransition: all 0.7s;\n}\n\n#ui-panel:hover {\n\topacity: 1;\n}\n\n.action-button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n\tborder-radius: 0;\n\tmargin-right: 5px;\n\tmargin-top: 5px;\n}\n\n.action-button:hover {\n\tcolor: #ffffff;\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n#prompt-group {\n\tposition: fixed;\n\tbottom: 10px;\n\tleft: 10px;\n\twidth: calc(100vw - 20px);\n\tpadding: 10px;\n\tbackground-color: #333333;\n\tborder-radius: 15px;\n\topacity: 0;\n\ttransition: all 0.3s;\n}\n\n#prompt-group > button {\n\tcolor: #a7a7a7;\n\tborder-color: #a7a7a7;\n}\n\n#prompt-group > button:hover {\n\tborder-color: #8f00ff;\n\tbackground-color: #8f00ff;\n}\n\n.fold {\n\tborder: none;\n\tbackground-color: transparent;\n\tfont-family: 'Space Mono', sans-serif;\n\tmax-width: 20px !important;\n\theight: 20px;\n\tcolor: #ffffff;\n\tpadding: auto;\n}\n\n.fold-vertical-line {\n\tposition: absolute;\n\ttop: 0;\n\tright: 8px;\n\twidth: 4px;\n\theight: 20px;\n\tbackground-color: #ffffff;\n}\n\n.fold-horizontal-line {\n\tposition: absolute;\n\ttop: 8px;\n\tright: 0px;\n\twidth: 20px;\n\theight: 4px;\n\tbackground-color: #ffffff;\n}\n\n#fold-gravity-controls {\n\tposition: absolute;\n\ttop: 16px;\n\tright: 24px;\n}\n\n#fold-links {\n\tdisplay: none;\n\tposition: absolute;\n\ttop: 15px;\n\tright: 20px;\n}\n\n.links-panel {\n\tdisplay: none;\n}\n\n@media only screen and (max-width: 500px) {\n\t#fold-links {\n\t\tdisplay: block;\n\t}\n\n\t.nav-links {\n\t\tdisplay: none;\n\t}\n\n\t.links-panel {\n\t\tdisplay: none;\n\t\tbackground-color: #333333;\n\t\tborder-radius: 25px;\n\t\tposition: absolute;\n\t\ttop: 56px;\n\t\tright: 0;\n\t}\n\n\t.links-panel > a {\n\t\tdisplay: block;\n\t\tpadding: 10px 20px;\n\t}\n\n\t.gravity-slider {\n\t\twidth: calc(100% - 30px);\n\t\tmargin: 8px 0;\n\t}\n}\n\n.counter {\n\tborder-radius: 5px;\n\tpadding: 0 5px;\n\tbackground-color: #ffffff !important;\n\tcolor: #333333;\n\tfont-weight: bolder;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -20909,6 +20909,109 @@ __webpack_async_result__();
 
 /***/ }),
 
+/***/ "./src/InlineGenSystem.js":
+/*!********************************!*\
+  !*** ./src/InlineGenSystem.js ***!
+  \********************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "InlineGenSystem": () => (/* binding */ InlineGenSystem)
+/* harmony export */ });
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/dist/index.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./src/constants.js");
+/* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([elixr__WEBPACK_IMPORTED_MODULE_0__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_2__]);
+([elixr__WEBPACK_IMPORTED_MODULE_0__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_2__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
+
+
+
+const myHeaders = new Headers();
+myHeaders.append('Accept', 'application/json, text/plain, */*');
+myHeaders.append('Accept-Language', 'en-US,en;q=0.5');
+myHeaders.append('Connection', 'keep-alive');
+myHeaders.append('Content-Type', 'application/json');
+myHeaders.append('Origin', 'https://skybox.blockadelabs.com');
+myHeaders.append('Referer', 'https://skybox.blockadelabs.com/');
+myHeaders.append('Sec-Fetch-Dest', 'empty');
+myHeaders.append('Sec-Fetch-Mode', 'cors');
+myHeaders.append('Sec-Fetch-Site', 'same-site');
+myHeaders.append('Sec-GPC', '1');
+myHeaders.append(
+	'User-Agent',
+	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+);
+myHeaders.append(
+	'sec-ch-ua',
+	'"Chromium";v="110", "Not A(Brand";v="24", "Brave";v="110"',
+);
+myHeaders.append('sec-ch-ua-mobile', '?0');
+myHeaders.append('sec-ch-ua-platform', '"macOS"');
+
+class InlineGenSystem extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameSystem {
+	init() {
+		this.skybox = this.queryGameObjects('skybox')[0].getMutableComponent(
+			_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_2__.SkyboxComponent,
+		);
+		const promptText = document.getElementById('prompt-text');
+		this.promptSend = document.getElementById('prompt-send');
+		this.promptSend.onclick = () => {
+			const generating = this.skybox.currentId !== this.skybox.requestedId;
+			if (generating) return;
+			const raw = JSON.stringify({
+				prompt: promptText.value.length > 0 ? promptText.value : 'nothing',
+				styleId: _constants__WEBPACK_IMPORTED_MODULE_1__.PROMPT_CATEGORIES.none.styleId,
+			});
+
+			const requestOptions = {
+				method: 'POST',
+				headers: myHeaders,
+				body: raw,
+				redirect: 'follow',
+			};
+
+			fetch('https://api.countapi.xyz/hit/felixtrz-skybx/gen', {
+				method: 'GET',
+			});
+
+			fetch(
+				'https://assetforger.blockadelabs.com/api/skybox/generateSkyboxImage',
+				requestOptions,
+			)
+				.then((response) => response.text())
+				.then((result) => {
+					const skyboxId = JSON.parse(result).id;
+					this.skybox.requestedId = skyboxId;
+					console.log('skybox generation requested', skyboxId);
+				})
+				.catch((error) => {
+					console.log('error', error);
+				});
+		};
+	}
+
+	update() {
+		const generating = this.skybox.currentId !== this.skybox.requestedId;
+		this.promptSend.disabled = generating;
+		const spinner = document.getElementById('gen-spinner');
+		spinner.style.display = generating ? 'block' : 'none';
+		const sendIcon = document.getElementById('send-icon');
+		sendIcon.style.display = generating ? 'none' : 'block';
+	}
+}
+
+InlineGenSystem.queries = {
+	skybox: { components: [_SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_2__.SkyboxComponent] },
+};
+
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
 /***/ "./src/KeyboardSystem.js":
 /*!*******************************!*\
   !*** ./src/KeyboardSystem.js ***!
@@ -21973,12 +22076,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SkyboxLoadingSystem */ "./src/SkyboxLoadingSystem.js");
 /* harmony import */ var _UISystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./UISystem */ "./src/UISystem.js");
 /* harmony import */ var _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./BannerPanelSystem */ "./src/BannerPanelSystem.js");
-/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
-/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
-/* harmony import */ var _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./WorldPanelSystem */ "./src/WorldPanelSystem.js");
-/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__]);
-([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var _InlineGenSystem__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./InlineGenSystem */ "./src/InlineGenSystem.js");
+/* harmony import */ var _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./PromptPanelSystem */ "./src/PromptPanelSystem.js");
+/* harmony import */ var _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./UIRenderSystem */ "./src/UIRenderSystem.js");
+/* harmony import */ var _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./WorldPanelSystem */ "./src/WorldPanelSystem.js");
+/* harmony import */ var _landing__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./landing */ "./src/landing.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _InlineGenSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_10__]);
+([_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__, elixr__WEBPACK_IMPORTED_MODULE_2__, _KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__, _SkyboxLoadingSystem__WEBPACK_IMPORTED_MODULE_4__, _UISystem__WEBPACK_IMPORTED_MODULE_5__, _BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__, _InlineGenSystem__WEBPACK_IMPORTED_MODULE_7__, _PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__, _UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__, _WorldPanelSystem__WEBPACK_IMPORTED_MODULE_10__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -22008,16 +22113,16 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 	game.addComponent(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardInputComponent);
 	core.registerGameSystem(_KeyboardSystem__WEBPACK_IMPORTED_MODULE_3__.KeyboardSystem);
 	core.registerGameSystem(_BannerPanelSystem__WEBPACK_IMPORTED_MODULE_6__.BannerPanelSystem);
-	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_7__.PromptPanelSystem);
+	core.registerGameSystem(_PromptPanelSystem__WEBPACK_IMPORTED_MODULE_8__.PromptPanelSystem);
 	core.registerGameSystem(_CategoryPanelSystem__WEBPACK_IMPORTED_MODULE_1__.CategoryPanelSystem);
-	core.registerGameSystem(_WorldPanelSystem__WEBPACK_IMPORTED_MODULE_9__.WorldPanelSystem);
+	core.registerGameSystem(_WorldPanelSystem__WEBPACK_IMPORTED_MODULE_10__.WorldPanelSystem);
 	core.registerGameSystem(elixr__WEBPACK_IMPORTED_MODULE_2__.XRSnapTurnSystem);
-	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_8__.UIRenderSystem);
+	core.registerGameSystem(_UIRenderSystem__WEBPACK_IMPORTED_MODULE_9__.UIRenderSystem);
+	core.registerGameSystem(_InlineGenSystem__WEBPACK_IMPORTED_MODULE_7__.InlineGenSystem);
 
 	core.inlineCamera.fov = 80;
 	core.inlineCamera.updateProjectionMatrix();
 	core.scene.add(new elixr__WEBPACK_IMPORTED_MODULE_2__.THREE.AmbientLight(0xffffff, 0.5));
-	core.renderer.xr.setFoveation(0);
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');
@@ -22033,7 +22138,7 @@ elixr__WEBPACK_IMPORTED_MODULE_2__.Core.init(document.getElementById('scene-cont
 		},
 	});
 
-	(0,_landing__WEBPACK_IMPORTED_MODULE_10__.landingPageLogic)();
+	(0,_landing__WEBPACK_IMPORTED_MODULE_11__.landingPageLogic)();
 });
 
 __webpack_async_result__();
@@ -22052,6 +22157,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "landingPageLogic": () => (/* binding */ landingPageLogic)
 /* harmony export */ });
 const landingPageLogic = () => {
+	const uiPanel = document.getElementById('ui-panel');
+	const inlineButton = document.getElementById('2d-button');
+	const promptGroup = document.getElementById('prompt-group');
+	inlineButton.onclick = () => {
+		uiPanel.style.transform = `translateY(${uiPanel.offsetHeight}px)`;
+		promptGroup.style.opacity = 0.9;
+	};
+	const exitPromptButton = document.getElementById('exit-prompt');
+	exitPromptButton.onclick = () => {
+		uiPanel.style.transform = `translateY(0px)`;
+		promptGroup.style.opacity = 0;
+	};
 	const webLaunchButton = document.getElementById('web-launch-button');
 	webLaunchButton.onclick = () => {
 		window.open(

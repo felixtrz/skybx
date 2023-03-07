@@ -1,4 +1,16 @@
 export const landingPageLogic = () => {
+	const uiPanel = document.getElementById('ui-panel');
+	const inlineButton = document.getElementById('2d-button');
+	const promptGroup = document.getElementById('prompt-group');
+	inlineButton.onclick = () => {
+		uiPanel.style.transform = `translateY(${uiPanel.offsetHeight}px)`;
+		promptGroup.style.opacity = 0.9;
+	};
+	const exitPromptButton = document.getElementById('exit-prompt');
+	exitPromptButton.onclick = () => {
+		uiPanel.style.transform = `translateY(0px)`;
+		promptGroup.style.opacity = 0;
+	};
 	const webLaunchButton = document.getElementById('web-launch-button');
 	webLaunchButton.onclick = () => {
 		window.open(
