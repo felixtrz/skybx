@@ -47,6 +47,7 @@ export class UISystem extends XRGameSystem {
 
 	initXR() {
 		this.core.playerSpace.add(this.ui.container);
+		this.core.renderer.xr.setFoveation(0);
 	}
 
 	exitXR() {

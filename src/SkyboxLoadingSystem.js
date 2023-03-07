@@ -1,5 +1,7 @@
 import { GameComponent, GameSystem, THREE, Types } from 'elixr';
 
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
 const SKYBOX_GEOMETRY = new THREE.SphereGeometry(500, 128, 128);
 const ANIMATION_DURATION = 1;
 const ANIMATION_STATES = {
@@ -8,7 +10,7 @@ const ANIMATION_STATES = {
 	Vanishing: 'vanishing',
 	Appearing: 'appearing',
 };
-const CAMERA_ANGULAR_SPEED = Math.PI / 36;
+const CAMERA_ANGULAR_SPEED = Math.PI / 4;
 
 const myHeaders = new Headers();
 myHeaders.append('Accept', 'application/json, text/plain, */*');
@@ -62,6 +64,17 @@ export class SkyboxLoadingSystem extends GameSystem {
 		this.state = 'idle';
 		this.prevState = 'idle';
 		this.animationTimer = 0;
+		this.orbitControls = new OrbitControls(
+			this.core.inlineCamera,
+			this.core.renderer.domElement,
+		);
+		this.orbitControls.target.set(0, 1.7, 0);
+		this.orbitControls.update();
+		this.orbitControls.enablePan = false;
+		this.orbitControls.enableDamping = true;
+		this.orbitControls.autoRotate = true;
+		this.orbitControls.rotateSpeed *= -0.5;
+		this.orbitControls.autoRotateSpeed = CAMERA_ANGULAR_SPEED;
 	}
 
 	initXR() {
@@ -75,14 +88,11 @@ export class SkyboxLoadingSystem extends GameSystem {
 	}
 
 	update(delta, _time) {
+		this.orbitControls.update();
 		this.fetchTimeout -= delta;
 		const skyboxComponent = this.queryGameObjects(
 			'game',
 		)[0].getMutableComponent(SkyboxComponent);
-
-		if (!this.core.isImmersive()) {
-			this.core.inlineCamera.rotateY(CAMERA_ANGULAR_SPEED * delta);
-		}
 
 		if (
 			!this.fetchInProgress &&

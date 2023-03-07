@@ -36,6 +36,7 @@ Core.init(document.getElementById('scene-container')).then((core) => {
 	core.inlineCamera.fov = 80;
 	core.inlineCamera.updateProjectionMatrix();
 	core.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+	core.renderer.xr.setFoveation(0);
 
 	const vrButton = document.getElementById('vr-button');
 	const webLaunchButton = document.getElementById('web-launch-button');
