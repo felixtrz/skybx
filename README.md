@@ -56,7 +56,7 @@ $ npm run serve
 
 ## API
 
-Please refer to [elixrjs.io](https://elixrjs.io) for full API documentation.
+Please refer to [Blockade Client API Docs](https://api-documentation.blockadelabs.com/api/) for full API documentation.
 
 ## License
 
