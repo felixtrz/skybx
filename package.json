@@ -27,7 +27,7 @@
 		"includedist"
 	],
 	"dependencies": {
-		"elixr": "../elixr",
+		"elixr": "^0.5.0",
 		"three-mesh-ui": "^6.5.3",
 		"troika-three-text": "^0.47.1"
 	}
