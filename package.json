@@ -8,7 +8,6 @@
 		"eslint-config-prettier": "^8.2.0",
 		"eslint-webpack-plugin": "^2.5.3",
 		"html-webpack-plugin": "^5.3.1",
-		"pre-commit": "^1.2.2",
 		"prettier": "2.2.1",
 		"style-loader": "^2.0.0",
 		"webpack": "^5.33.2",
@@ -22,10 +21,6 @@
 		"format": "prettier --write ./src/**/*",
 		"includedist": "git add ./dist/*"
 	},
-	"pre-commit": [
-		"build",
-		"includedist"
-	],
 	"dependencies": {
 		"elixr": "^0.5.0",
 		"three-mesh-ui": "^6.5.3",
